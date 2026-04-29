@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdPulse — Full Funnel Lead Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0a;
+    --surface: #0f180f;
+    --surface2: #162016;
+    --border: #1e301e;
+    --accent: #4ade80;
+    --accent2: #86efac;
+    --orange: #fb923c;
+    --red: #f87171;
+    --yellow: #fbbf24;
+    --blue: #60a5fa;
+    --text: #e8f0e8;
+    --text2: #7a9a7a;
+    --text3: #405040;
+    --mono: 'Space Mono', monospace;
+    --sans: 'Sarabun', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(74,222,128,0.04) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(74,222,128,0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    padding: 40px 0 32px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .logo-mark {
+    width: 36px; height: 36px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: #0a0f0a;
+  }
+
+  .logo-text {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text2);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-size: clamp(24px, 4vw, 36px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+
+  h1 span { color: var(--accent); }
+  .subtitle { font-size: 15px; color: var(--text2); line-height: 1.6; }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .card:focus-within::before { opacity: 1; }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text2);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .slider-group { margin-bottom: 22px; }
+  .slider-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; }
+  .slider-label { font-size: 14px; color: var(--text); font-weight: 500; }
+  .slider-hint { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .slider-value {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(74,222,128,0.2);
+    transition: box-shadow 0.2s;
+  }
+  input[type=range]::-webkit-slider-thumb:hover {
+    box-shadow: 0 0 0 6px rgba(74,222,128,0.2);
+  }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
+
+  @media(max-width:640px){
+    .grid2,.grid3,.grid4{grid-template-columns:1fr 1fr;}
+  }
+  @media(max-width:480px){
+    .grid2,.grid3,.grid4{grid-template-columns:1fr;}
+  }
+
+  .kpi {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .kpi-label { font-size: 11px; color: var(--text3); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 8px; font-weight: 600; }
+  .kpi-val { font-family: var(--mono); font-size: 20px; font-weight: 700; color: var(--text); line-height: 1; margin-bottom: 6px; }
+  .kpi-sub { font-size: 11px; color: var(--text3); line-height: 1.4; }
+
+  .kpi.ok { border-color: rgba(74,222,128,0.3); background: rgba(74,222,128,0.06); }
+  .kpi.ok .kpi-val { color: var(--accent); }
+  .kpi.warn { border-color: rgba(251,191,36,0.3); background: rgba(251,191,36,0.06); }
+  .kpi.warn .kpi-val { color: var(--yellow); }
+  .kpi.danger { border-color: rgba(248,113,113,0.3); background: rgba(248,113,113,0.06); }
+  .kpi.danger .kpi-val { color: var(--red); }
+  .kpi.blue { border-color: rgba(96,165,250,0.3); background: rgba(96,165,250,0.06); }
+  .kpi.blue .kpi-val { color: var(--blue); }
+
+  /* Funnel visual */
+  .funnel {
+    margin-bottom: 24px;
+  }
+
+  .funnel-step {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 4px;
+    transition: border-color 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .funnel-step::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+
+  .funnel-step.step-marketing::before { background: var(--blue); }
+  .funnel-step.step-sales::before { background: var(--accent); }
+  .funnel-step.step-revenue::before { background: var(--yellow); }
+  .funnel-step.step-target::before { background: var(--orange); }
+
+  .funnel-icon {
+    font-size: 22px;
+    width: 40px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .funnel-content { flex: 1; }
+  .funnel-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .funnel-sub { font-size: 11px; color: var(--text2); }
+
+  .funnel-right { text-align: right; flex-shrink: 0; }
+  .funnel-num { font-family: var(--mono); font-size: 18px; font-weight: 700; }
+  .funnel-rate { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  .funnel-arrow {
+    text-align: center;
+    padding: 4px 0;
+    color: var(--text3);
+    font-size: 18px;
+  }
+
+  /* Progress bar */
+  .progress-wrap {
+    margin: 8px 0 4px;
+    background: var(--border);
+    border-radius: 3px;
+    height: 6px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease;
+  }
+
+  /* Table */
+  .table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--surface2); }
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+  }
+  th.r, td.r { text-align: right; }
+  td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(30,48,30,0.5);
+    color: var(--text);
+    font-size: 13px;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.015); }
+  .tr-rec td { background: rgba(74,222,128,0.06); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-green { background: rgba(74,222,128,0.15); color: var(--accent); border: 1px solid rgba(74,222,128,0.3); }
+  .badge-yellow { background: rgba(251,191,36,0.15); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+  .badge-blue { background: rgba(96,165,250,0.15); color: var(--blue); border: 1px solid rgba(96,165,250,0.3); }
+  .badge-orange { background: rgba(251,146,60,0.15); color: var(--orange); border: 1px solid rgba(251,146,60,0.3); }
+
+  .alert {
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    line-height: 1.7;
+    border-left: 3px solid;
+  }
+  .alert b { font-weight: 600; }
+  .alert-green { background: rgba(74,222,128,0.08); border-color: var(--accent); color: #86efac; }
+  .alert-yellow { background: rgba(251,191,36,0.08); border-color: var(--yellow); color: #fde68a; }
+  .alert-red { background: rgba(248,113,113,0.08); border-color: var(--red); color: #fca5a5; }
+  .alert-blue { background: rgba(96,165,250,0.08); border-color: var(--blue); color: #bfdbfe; }
+
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(74,222,128,0.1);
+    border: 1px solid rgba(74,222,128,0.3);
+    color: var(--accent);
+    text-decoration: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+    margin-bottom: 32px;
+  }
+  .nav-link:hover { background: rgba(74,222,128,0.18); transform: translateY(-1px); }
+
+  /* SLA cards */
+  .sla-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+  }
+  .sla-team {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    font-family: var(--mono);
+  }
+  .sla-marketing .sla-team { background: rgba(96,165,250,0.15); color: var(--blue); }
+  .sla-sales .sla-team { background: rgba(74,222,128,0.15); color: var(--accent); }
+  .sla-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(30,48,30,0.5);
+    font-size: 13px;
+  }
+  .sla-item:last-child { border-bottom: none; }
+  .sla-desc { color: var(--text2); }
+  .sla-val { font-family: var(--mono); font-weight: 700; color: var(--text); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animate { animation: fadeUp 0.5s ease both; }
+  .d1 { animation-delay: 0.05s; }
+  .d2 { animation-delay: 0.12s; }
+  .d3 { animation-delay: 0.20s; }
+  .d4 { animation-delay: 0.28s; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 0;
+    margin-top: 64px;
+    text-align: center;
+    color: var(--text3);
+    font-size: 12px;
+    font-family: var(--mono);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="animate">
+    <div class="logo">
+      <div class="logo-mark">AP</div>
+      <div class="logo-text">AdPulse — Media Buyer Tools</div>
+    </div>
+    <h1>Full Funnel <span>Lead Calculator</span></h1>
+    <p class="subtitle">คำนวณ Lead KPI ที่ต้องส่งให้ทีมขาย และตรวจสอบว่าตัวเลขทุกอย่างสอดคล้องกับ Sales Target<br>ปรับตัวแปรแล้วดูผลกระทบตลอด funnel แบบ real-time</p>
+  </header>
+
+  <a href="media-test-budget.html" class="nav-link animate d1">← กลับไปคำนวณงบทดสอบสื่อ</a>
+
+  <!-- INPUTS -->
+  <div class="section-label animate d1">01 — กำหนดตัวแปร</div>
+
+  <div class="card animate d2">
+    <div class="grid2">
+      <div>
+        <div class="card-title">ฝั่งการตลาด (Ad Performance)</div>
+        <div class="slider-group">
+          <div class="slider-header">
+            <div>
+              <div class="slider-label">KPI Leads / เดือน (qualified inbox)</div>
+              <div class="slider-hint">inbox ที่มีการโต้ตอบ ไม่ใช่ inbox ทั้งหมด</div>
+            </div>
+            <div class="slider-value" id="v_leads">2,000</div>
+          </div>
+          <input type="range" id="leads" min="300" max="5000" step="100" value="2000">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header">
+            <div>
+              <div class="slider-label">Cost per Qualified Lead (฿)</div>
+              <div class="slider-hint">บัญชีนี้: มี.ค. ฿206 · เม.ย. ฿341</div>
+            </div>
+            <div class="slider-value" id="v_cpl">฿206</div>
+          </div>
+          <input type="range" id="cpl" min="100" max="600" step="10" value="206">
+        </div>
+      </div>
+      <div>
+        <div class="card-title">ฝั่งขาย (Sales Performance)</div>
+        <div class="slider-group">
+          <div class="slider-header">
+            <div>
+              <div class="slider-label">Close Rate ทีมขาย (%)</div>
+              <div class="slider-hint">มาตรฐาน 35% · ปัจจุบัน 25.6%</div>
+            </div>
+            <div class="slider-value" id="v_close">35%</div>
+          </div>
+          <input type="range" id="close" min="10" max="65" step="1" value="35">
+        </div>
+        <div class="slider-group">
+          <div class="slider-header">
+            <div>
+              <div class="slider-label">Average Order Value (฿)</div>
+              <div class="slider-hint">AOV จริงบัญชีนี้: ฿2,039</div>
+            </div>
+            <div class="slider-value" id="v_aov">฿2,039</div>
+          </div>
+          <input type="range" id="aov" min="500" max="8000" step="50" value="2039">
+        </div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="slider-group">
+      <div class="slider-header">
+        <div>
+          <div class="slider-label">Sales Target รายเดือน (฿)</div>
+          <div class="slider-hint">Teezeer target: ฿2,500,000/เดือน</div>
+        </div>
+        <div class="slider-value" id="v_target">฿2,500,000</div>
+      </div>
+      <input type="range" id="target" min="200000" max="6000000" step="50000" value="2500000">
+    </div>
+  </div>
+
+  <!-- KPI OVERVIEW -->
+  <div class="section-label animate d2">02 — ผลรวม Full Funnel</div>
+
+  <div class="grid4 animate d3" style="margin-bottom:24px" id="kpiRow"></div>
+
+  <!-- FUNNEL VISUAL -->
+  <div class="section-label animate d3">03 — Visual Funnel</div>
+
+  <div class="funnel animate d3" id="funnelDisplay"></div>
+
+  <!-- GAP ANALYSIS -->
+  <div class="section-label animate d3">04 — Gap Analysis</div>
+
+  <div id="gapDisplay" class="animate d3"></div>
+
+  <!-- 3 OPTIONS -->
+  <div class="section-label animate d4">05 — วิธีปิด Gap</div>
+
+  <div class="table-wrap animate d4">
+    <table>
+      <thead>
+        <tr>
+          <th>วิธี</th>
+          <th>แก้ที่</th>
+          <th class="r">Leads ที่ต้องการ</th>
+          <th class="r">Close Rate</th>
+          <th class="r">งบโฆษณา</th>
+          <th class="r">AOV ที่ต้องการ</th>
+          <th>ความยาก</th>
+        </tr>
+      </thead>
+      <tbody id="optionTable"></tbody>
+    </table>
+  </div>
+
+  <!-- SLA -->
+  <div class="section-label animate d4">06 — SLA ระหว่างทีม</div>
+
+  <div class="grid2 animate d4" id="slaDisplay"></div>
+
+  <!-- QUALITY FRAMEWORK -->
+  <div class="section-label">07 — Lead Quality Framework</div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>ประเภท Lead</th>
+          <th>นิยาม</th>
+          <th>นับเป็น KPI</th>
+          <th>ใครรับผิดชอบ</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="tr-rec">
+          <td><span class="badge badge-green">✓ Qualified</span></td>
+          <td style="font-size:12px">ตอบกลับ + ถามราคา/สินค้า + ให้ข้อมูลตัวเอง</td>
+          <td><strong style="color:var(--accent)">✓ นับเต็ม</strong></td>
+          <td style="font-size:12px">การตลาด deliver · ขายปิด</td>
+          <td><span class="badge badge-green">ส่งทีมขายทันที</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-yellow">~ Warm</span></td>
+          <td style="font-size:12px">ตอบ 1–2 ครั้ง ยังไม่ถามราคา</td>
+          <td style="color:var(--yellow)">นับครึ่ง</td>
+          <td style="font-size:12px">ทีมขาย nurture ต่อ</td>
+          <td><span class="badge badge-yellow">Follow-up 24 ชม.</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-red">✗ Ghost</span></td>
+          <td style="font-size:12px">เปิด inbox ไม่ตอบเลย</td>
+          <td style="color:var(--red)">ไม่นับ</td>
+          <td style="font-size:12px">Creative ผิด audience</td>
+          <td><span class="badge badge-red">แจ้งการตลาด review</span></td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-red">✗ Spam</span></td>
+          <td style="font-size:12px">ถามทั่วไป ไม่เกี่ยวสินค้า</td>
+          <td style="color:var(--red)">ไม่นับ</td>
+          <td style="font-size:12px">Targeting ผิด</td>
+          <td><span class="badge badge-red">แจ้งการตลาด fix targeting</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ALERTS -->
+  <div id="alertBox"></div>
+
+</div>
+
+<footer>
+  <div class="container">AdPulse Media Buyer Tools · สร้างจากข้อมูลบัญชีจริง 20 มี.ค.–2 เม.ย. 2026</div>
+</footer>
+
+<script>
+function fmt(n){ return '฿' + Math.round(n).toLocaleString('th-TH'); }
+function fmtN(n){ return Math.round(n).toLocaleString('th-TH'); }
+function pct(n){ return (n*100).toFixed(1)+'%'; }
+
+function calc(){
+  const leads    = +document.getElementById('leads').value;
+  const cpl      = +document.getElementById('cpl').value;
+  const close    = +document.getElementById('close').value / 100;
+  const aov      = +document.getElementById('aov').value;
+  const target   = +document.getElementById('target').value;
+
+  document.getElementById('v_leads').textContent  = fmtN(leads);
+  document.getElementById('v_cpl').textContent    = fmt(cpl);
+  document.getElementById('v_close').textContent  = Math.round(close*100)+'%';
+  document.getElementById('v_aov').textContent    = fmt(aov);
+  document.getElementById('v_target').textContent = fmt(target);
+
+  const orders     = Math.round(leads * close);
+  const revenue    = orders * aov;
+  const adBudget   = leads * cpl;
+  const roas       = revenue / adBudget;
+  const cpa        = adBudget / (orders || 1);
+  const maxCPA     = aov * 0.35;
+  const gap        = target - revenue;
+  const gapOrders  = Math.ceil(Math.max(0, gap) / aov);
+  const gapLeads   = Math.ceil(gapOrders / close);
+  const achievePct = Math.min(100, revenue / target * 100);
+  const revenueOk  = revenue >= target;
+  const roasOk     = roas >= 4.0;
+  const cpaOk      = cpa <= maxCPA;
+
+  // KPI Row
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi ${revenueOk ? 'ok' : 'danger'}">
+      <div class="kpi-label">Revenue คาดหวัง</div>
+      <div class="kpi-val">${fmt(revenue)}</div>
+      <div class="kpi-sub">${revenueOk ? '✓ ถึง target' : '✗ ขาด ' + fmt(gap)}</div>
+    </div>
+    <div class="kpi ${roasOk ? 'ok' : 'warn'}">
+      <div class="kpi-label">ROAS คาดหวัง</div>
+      <div class="kpi-val">${roas.toFixed(2)}×</div>
+      <div class="kpi-sub">target 4.0× ${roasOk ? '✓' : '— ต่ำกว่า'}</div>
+    </div>
+    <div class="kpi blue">
+      <div class="kpi-label">Orders / เดือน</div>
+      <div class="kpi-val">${fmtN(orders)}</div>
+      <div class="kpi-sub">${fmtN(leads)} leads × ${Math.round(close*100)}% close</div>
+    </div>
+    <div class="kpi ${cpaOk ? 'ok' : 'danger'}">
+      <div class="kpi-label">CPA จากแอด</div>
+      <div class="kpi-val">${fmt(cpa)}</div>
+      <div class="kpi-sub">max ${fmt(maxCPA)} ${cpaOk ? '✓' : '✗'}</div>
+    </div>
+  `;
+
+  // Funnel Visual
+  const barPct = Math.min(100, achievePct);
+  const barColor = revenueOk ? '#4ade80' : achievePct > 70 ? '#fbbf24' : '#f87171';
+  document.getElementById('funnelDisplay').innerHTML = `
+    <div class="funnel-step step-marketing">
+      <div class="funnel-icon">📣</div>
+      <div class="funnel-content">
+        <div class="funnel-title">Qualified Leads — ทีมการตลาด deliver</div>
+        <div class="funnel-sub">งบโฆษณา ${fmt(adBudget)}/เดือน · Cost/Lead ${fmt(cpl)}</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:100%;background:#60a5fa"></div></div>
+      </div>
+      <div class="funnel-right">
+        <div class="funnel-num" style="color:#60a5fa">${fmtN(leads)}</div>
+        <div class="funnel-rate">leads/เดือน</div>
+      </div>
+    </div>
+    <div class="funnel-arrow">↓ close ${Math.round(close*100)}%</div>
+    <div class="funnel-step step-sales">
+      <div class="funnel-icon">💬</div>
+      <div class="funnel-content">
+        <div class="funnel-title">Orders ที่ปิดได้ — ทีมขาย</div>
+        <div class="funnel-sub">AOV ${fmt(aov)} · ${fmtN(leads - orders)} leads ไม่ซื้อ (${pct(1-close)})</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${close*100}%;background:#4ade80"></div></div>
+      </div>
+      <div class="funnel-right">
+        <div class="funnel-num" style="color:#4ade80">${fmtN(orders)}</div>
+        <div class="funnel-rate">orders/เดือน</div>
+      </div>
+    </div>
+    <div class="funnel-arrow">↓ × AOV ${fmt(aov)}</div>
+    <div class="funnel-step step-revenue">
+      <div class="funnel-icon">💰</div>
+      <div class="funnel-content">
+        <div class="funnel-title">Revenue คาดหวัง</div>
+        <div class="funnel-sub">${fmtN(orders)} orders × ${fmt(aov)} AOV</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:${barPct}%;background:${barColor}"></div></div>
+      </div>
+      <div class="funnel-right">
+        <div class="funnel-num" style="color:${barColor}">${fmt(revenue)}</div>
+        <div class="funnel-rate">${barPct.toFixed(0)}% ของ target</div>
+      </div>
+    </div>
+    <div class="funnel-arrow">vs</div>
+    <div class="funnel-step step-target" style="background:rgba(251,146,60,0.06);border-color:rgba(251,146,60,0.3)">
+      <div class="funnel-icon">🎯</div>
+      <div class="funnel-content">
+        <div class="funnel-title">Sales Target</div>
+        <div class="funnel-sub">ต้องการ ${fmtN(Math.ceil(target/aov))} orders / ${fmtN(Math.ceil(target/(aov*close)))} leads ที่ close ${Math.round(close*100)}%</div>
+      </div>
+      <div class="funnel-right">
+        <div class="funnel-num" style="color:#fb923c">${fmt(target)}</div>
+        <div class="funnel-rate">${revenueOk ? '✓ ถึง target' : '✗ ขาด ' + fmt(gap)}</div>
+      </div>
+    </div>
+  `;
+
+  // Gap display
+  const leadsNeeded = Math.ceil(target / (close * aov));
+  document.getElementById('gapDisplay').innerHTML = revenueOk
+    ? `<div class="alert alert-green"><b>✓ Funnel สมดุล — ถึง Sales Target แล้ว</b><br>
+       Revenue ${fmt(revenue)} เกิน target ${fmt(target)} อยู่ ${fmt(revenue - target)}<br>
+       ควร scale budget ขึ้นอีก 20-25% เพื่อเพิ่ม revenue ต่อ</div>`
+    : `<div class="alert alert-red"><b>✗ Funnel ไม่สมดุล — ยังขาด ${fmt(gap)} จาก target</b><br>
+       ต้องเพิ่ม leads อีก <strong>${fmtN(gapLeads)} leads/เดือน</strong> (รวมเป็น ${fmtN(leadsNeeded)} leads) ที่ close rate เดิม<br>
+       หรือเพิ่ม close rate เป็น <strong>${pct(target/revenue * close)}</strong> ด้วย leads เดิม<br>
+       หรือเพิ่ม AOV เป็น <strong>${fmt(target/orders)}</strong> ด้วย leads และ close rate เดิม</div>`;
+
+  // Options table
+  const opt1_leads = leadsNeeded;
+  const opt1_close = close;
+  const opt1_budget = opt1_leads * cpl;
+
+  const opt2_leads = leads;
+  const opt2_close = Math.min(0.65, target / (leads * aov));
+  const opt2_budget = leads * cpl;
+
+  const opt3_leads = leads;
+  const opt3_aov = Math.ceil(target / (leads * close));
+  const opt3_budget = leads * cpl;
+
+  const opt4_leads = Math.ceil(leads * 1.25);
+  const opt4_close = Math.min(0.45, target / (opt4_leads * aov) * 0.95);
+  const opt4_budget = opt4_leads * cpl;
+
+  const rows = [
+    { label:'เพิ่ม Leads อย่างเดียว', fix:'งบโฆษณา + creative', leads: opt1_leads, close: opt1_close, budget: opt1_budget, aov_need: aov, hard: opt1_leads > leads*1.8 ? 'สูงมาก' : opt1_leads > leads*1.3 ? 'สูง' : 'กลาง', hclass: opt1_leads>leads*1.5?'badge-red':'badge-yellow' },
+    { label:'เพิ่ม Close Rate', fix:'Script + Training ทีมขาย', leads: opt2_leads, close: opt2_close, budget: opt2_budget, aov_need: aov, hard: opt2_close > 0.55 ? 'สูงมาก' : 'กลาง', hclass: opt2_close>0.55?'badge-red':'badge-green' },
+    { label:'เพิ่ม AOV (Upsell)', fix:'Bundle + Upsell script', leads: opt3_leads, close: close, budget: opt3_budget, aov_need: opt3_aov, hard: opt3_aov > aov*1.6 ? 'สูงมาก' : 'กลาง', hclass: opt3_aov>aov*1.5?'badge-red':'badge-yellow' },
+    { label:'Hybrid: Leads+25% + Close↑', fix:'ทั้งสองด้านพร้อมกัน', leads: opt4_leads, close: opt4_close, budget: opt4_budget, aov_need: aov, hard: '⭐ แนะนำ', hclass: 'badge-green' },
+  ];
+
+  let tHtml = '';
+  rows.forEach((r, i) => {
+    const isRec = r.hard.includes('⭐');
+    tHtml += `<tr class="${isRec ? 'tr-rec' : ''}">
+      <td><strong>${r.label}</strong></td>
+      <td style="font-size:12px;color:var(--text2)">${r.fix}</td>
+      <td class="r" style="font-family:var(--mono)">${fmtN(r.leads)}</td>
+      <td class="r" style="font-family:var(--mono)">${Math.round(r.close*100)}%</td>
+      <td class="r" style="font-family:var(--mono);color:var(--accent)">${fmt(r.budget)}</td>
+      <td class="r" style="font-family:var(--mono)">${r.aov_need !== aov ? '<span style="color:var(--orange)">' + fmt(r.aov_need) + '</span>' : fmt(r.aov_need)}</td>
+      <td><span class="badge ${r.hclass}">${r.hard}</span></td>
+    </tr>`;
+  });
+  document.getElementById('optionTable').innerHTML = tHtml;
+
+  // SLA
+  const wkLeads  = Math.ceil(leads / 4.3);
+  const dayLeads = Math.ceil(leads / 30);
+  document.getElementById('slaDisplay').innerHTML = `
+    <div class="sla-card sla-marketing">
+      <div class="sla-team">📣 ทีมการตลาด — SLA</div>
+      <div class="sla-item"><span class="sla-desc">Qualified Leads / สัปดาห์</span><span class="sla-val">${fmtN(wkLeads)} leads</span></div>
+      <div class="sla-item"><span class="sla-desc">Qualified Leads / วัน</span><span class="sla-val">${fmtN(dayLeads)} leads</span></div>
+      <div class="sla-item"><span class="sla-desc">Cost per Qualified Lead สูงสุด</span><span class="sla-val">${fmt(cpl)}</span></div>
+      <div class="sla-item"><span class="sla-desc">Lead Quality Score (min)</span><span class="sla-val">60% response rate</span></div>
+      <div class="sla-item"><span class="sla-desc">งบโฆษณา / เดือน</span><span class="sla-val">${fmt(adBudget)}</span></div>
+    </div>
+    <div class="sla-card sla-sales">
+      <div class="sla-team">💬 ทีมขาย — SLA</div>
+      <div class="sla-item"><span class="sla-desc">Close Rate มาตรฐาน</span><span class="sla-val">${Math.round(close*100)}%</span></div>
+      <div class="sla-item"><span class="sla-desc">AOV เป้าหมาย</span><span class="sla-val">${fmt(aov)}</span></div>
+      <div class="sla-item"><span class="sla-desc">Response time สูงสุด</span><span class="sla-val">&lt; 10 นาที</span></div>
+      <div class="sla-item"><span class="sla-desc">Upsell Rate เป้าหมาย</span><span class="sla-val">≥ 20%</span></div>
+      <div class="sla-item"><span class="sla-desc">Orders เป้า / เดือน</span><span class="sla-val">${fmtN(Math.ceil(target/aov))} orders</span></div>
+    </div>
+  `;
+
+  // Alerts
+  let alerts = '';
+  if (!revenueOk) {
+    alerts += `<div class="alert alert-red"><b>⚠️ Lead KPI ${fmtN(leads)} ไม่พอถึง Sales Target</b><br>
+    ต้องการ ${fmtN(leadsNeeded)} leads/เดือน ที่ close ${Math.round(close*100)}% และ AOV ${fmt(aov)}<br>
+    ช่องว่าง: ${fmtN(leadsNeeded - leads)} leads — คำถามที่ต้องตอบก่อนจัดงบ: เพิ่ม leads หรือ close rate?</div>`;
+  }
+  if (!roasOk) {
+    alerts += `<div class="alert alert-yellow"><b>⚠️ ROAS ${roas.toFixed(2)}× ต่ำกว่า target 4.0×</b><br>
+    ที่งบ ${fmt(adBudget)} และ revenue ${fmt(revenue)} — ROAS จะถึง 4× ต้องลด cost/lead เหลือ ${fmt(revenue/4/leads)} หรือเพิ่ม revenue เป็น ${fmt(adBudget*4)}</div>`;
+  }
+  if (!cpaOk) {
+    alerts += `<div class="alert alert-red"><b>⚠️ CPA ${fmt(cpa)} เกิน Max CPA ${fmt(maxCPA)} (35% ของ ${fmt(aov)})</b><br>
+    ต้องเพิ่ม close rate เป็น ${pct(adBudget/(orders * maxCPA) * close)} หรือลด cost/lead เหลือ ${fmt(maxCPA * close)}</div>`;
+  }
+  if (revenueOk && roasOk && cpaOk) {
+    alerts += `<div class="alert alert-green"><b>✓ Funnel สมดุลทุกมิติ</b><br>
+    Revenue ถึง target · ROAS ${roas.toFixed(2)}× &gt; 4.0× · CPA ${fmt(cpa)} &lt; Max ${fmt(maxCPA)}<br>
+    พร้อม scale — เพิ่มงบได้ 20-25% ทุก 48–72 ชม.</div>`;
+  }
+  document.getElementById('alertBox').innerHTML = alerts;
+}
+
+['leads','cpl','close','aov','target'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calc);
+});
+calc();
+</script>
+</body>
+</html>
