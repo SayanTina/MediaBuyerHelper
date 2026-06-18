@@ -145,6 +145,13 @@ hr{border:none;border-top:1px solid var(--border);margin:1.25rem 0;}
     <div class="nav-section">วิเคราะห์</div>
     <div class="nav-item" onclick="showTab('mix')"><span class="nav-dot"></span>Revenue Mix</div>
   </nav>
+  <div style="padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.08)">
+    <div style="font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.3);text-transform:uppercase;margin-bottom:8px">ข้อมูล</div>
+    <button onclick="exportConfig()" style="display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.15);cursor:pointer;margin-bottom:6px">↓ Export JSON</button>
+    <label style="display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;width:100%;padding:7px 14px;border-radius:var(--radius-sm);font-size:12px;background:rgba(255,255,255,0.05);color:rgba(255,255,255,0.65);border:1px solid rgba(255,255,255,0.12)">
+      ↑ Import JSON<input type="file" id="import-file" accept=".json" style="display:none" onchange="importConfig(this)">
+    </label>
+  </div>
 </aside>
 
 <div class="main">
@@ -334,6 +341,31 @@ function costBar(segs){
   return h+'</div>';
 }
 
+let editingId = null;
+
+function startEdit(id){
+  editingId = id;
+  renderProducts();
+}
+function cancelEdit(){
+  editingId = null;
+  renderProducts();
+}
+function saveEdit(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  p.name   = $('e_name_'+id).value.trim() || p.name;
+  p.aov    = parseFloat($('e_aov_'+id).value)    || p.aov;
+  p.cogs   = parseFloat($('e_cogs_'+id).value)   || p.cogs;
+  p.vat    = parseFloat($('e_vat_'+id).value)     || p.vat;
+  p.ship   = parseFloat($('e_ship_'+id).value)    || p.ship;
+  p.coupon = parseFloat($('e_coupon_'+id).value)  || p.coupon;
+  p.ret    = parseFloat($('e_ret_'+id).value)     || p.ret;
+  p.type   = $('e_type_'+id).value;
+  editingId = null;
+  recalc();
+}
+
 function renderProducts(){
   const list=$('product-list');
   if(!list) return;
@@ -341,15 +373,53 @@ function renderProducts(){
     const cfb=cmFB(p),ccrm=cmCRM(p),cline=cmLine(p),cblend=cmBlendedProduct(p);
     const chTotal=p.fb+p.crm+p.line;
     const chWarn=Math.abs(chTotal-100)>1?`<span style="color:var(--warn);font-size:11px"> ⚠ รวม ${chTotal}%</span>`:'';
+    const isEditing = editingId === p.id;
+    const typeLbl = p.type==='main'?'หลัก':p.type==='partner'?'Partner':'Upsell';
+
+    const editForm = `
+      <div style="background:var(--surface2);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem">
+        <div style="font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--text3);margin-bottom:10px">แก้ไขข้อมูลสินค้า</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:10px">
+          ${[
+            ['ชื่อสินค้า','e_name_'+p.id,'text',p.name],
+            ['AOV (บาท)','e_aov_'+p.id,'number',p.aov],
+            ['ต้นทุนสินค้า (%)','e_cogs_'+p.id,'number',p.cogs],
+            ['VAT (%)','e_vat_'+p.id,'number',p.vat],
+            ['Shipping (%)','e_ship_'+p.id,'number',p.ship],
+            ['Coupon (%)','e_coupon_'+p.id,'number',p.coupon],
+            ['Return Rate (%)','e_ret_'+p.id,'number',p.ret],
+          ].map(([lbl,eid,tp,val])=>`
+            <div class="field">
+              <label>${lbl}</label>
+              <input type="${tp}" id="${eid}" value="${val}" step="0.5"
+                style="border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 8px;font-size:13px;background:var(--surface);color:var(--text)">
+            </div>`).join('')}
+          <div class="field">
+            <label>ประเภท</label>
+            <select id="e_type_${p.id}" style="border:1px solid var(--border2);border-radius:var(--radius-sm);padding:6px 8px;font-size:13px;background:var(--surface);color:var(--text)">
+              <option value="main" ${p.type==='main'?'selected':''}>สินค้าหลัก</option>
+              <option value="partner" ${p.type==='partner'?'selected':''}>Partner</option>
+              <option value="upsell" ${p.type==='upsell'?'selected':''}>Upsell/Bundle</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="saveEdit(${p.id})">บันทึก</button>
+          <button class="btn btn-sm" onclick="cancelEdit()">ยกเลิก</button>
+        </div>
+      </div>`;
+
     return `<div class="product-card">
       <div class="pc-header">
-        <div class="pc-name">${p.name} <span class="badge badge-info" style="margin-left:6px;font-size:10px">${p.type==='main'?'หลัก':p.type==='partner'?'Partner':'Upsell'}</span></div>
+        <div class="pc-name">${p.name} <span class="badge badge-info" style="margin-left:6px;font-size:10px">${typeLbl}</span></div>
         <div style="display:flex;gap:8px;align-items:center">
           ${statusBadge(cblend)}
+          <button class="btn btn-sm" onclick="startEdit(${p.id})" style="color:var(--info)">✎ แก้ไข</button>
           <button class="btn btn-sm btn-danger" onclick="removeProduct(${p.id})">ลบ</button>
         </div>
       </div>
       <div class="pc-body">
+        ${isEditing ? editForm : ''}
         <div class="pc-grid">
           <div class="pc-stat"><div class="pc-stat-label">AOV</div><div class="pc-stat-val">${fmt(p.aov)} ฿</div></div>
           <div class="pc-stat"><div class="pc-stat-label">Var Cost</div><div class="pc-stat-val">${vc(p).toFixed(1)}%</div></div>
@@ -599,6 +669,97 @@ function renderDashboard(){
 
   const vc2=blended>target?'good':blended>0?'warn':'bad';
   $('dash-verdict').innerHTML=`<div class="verdict ${vc2}"><div class="verdict-title">${blended>target?'✓ โครงสร้างปัจจุบันสามารถทำกำไรได้':blended>0?'⚠ Blended CM ต่ำกว่า Target':'✗ ขาดทุน — ต้องปรับโครงสร้างด่วน'}</div><div class="verdict-body">Blended CM ${blended.toFixed(1)}% | Target ${target}% | ยอดที่ต้องทำ ${beT?fmt(beT)+' บาท/เดือน':'—'}</div></div>`;
+}
+
+function exportConfig(){
+  const config = {
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    company: {
+      fixed: gv('c_fixed'),
+      target: gv('c_target'),
+      fb_ads: gv('c_fb_ads'),
+      line_cost: gv('c_line_cost'),
+      crm_fc: gv('c_crm_fc'),
+    },
+    simulator: {
+      b1: gv('sim_b1'),
+      ads: gv('sim_ads'),
+      aov: gv('sim_aov'),
+      leads: gv('sim_leads'),
+      conv: gv('sim_conv'),
+    },
+    mix: {
+      rev: gv('mix_rev'),
+    },
+    products,
+    nextId,
+  };
+  const blob = new Blob([JSON.stringify(config, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'revenue_planner_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importConfig(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const config = JSON.parse(e.target.result);
+      if(!config.version || !config.products) { alert('ไฟล์ไม่ถูกต้อง'); return; }
+
+      // Company settings
+      const c = config.company;
+      $('c_fixed').value   = c.fixed;
+      $('c_target').value  = c.target;
+      $('c_fb_ads').value  = c.fb_ads;
+      $('c_line_cost').value = c.line_cost;
+      $('c_crm_fc').value  = c.crm_fc;
+      sv('c_fb_ads','c_fb_ads_v',true);
+      sv('c_line_cost','c_line_cost_v',true);
+      sv('c_crm_fc','c_crm_fc_v',true);
+
+      // Simulator
+      const s = config.simulator;
+      $('sim_b1').value    = s.b1;
+      $('sim_ads').value   = s.ads;
+      $('sim_aov').value   = s.aov;
+      $('sim_leads').value = s.leads;
+      $('sim_conv').value  = s.conv;
+      sv('sim_b1','sim_b1_v','M');
+      sv('sim_ads','sim_ads_v',true);
+      sv('sim_aov','sim_aov_v','n');
+      sv('sim_leads','sim_leads_v','n');
+      sv('sim_conv','sim_conv_v',true);
+
+      // Mix
+      $('mix_rev').value = config.mix.rev;
+      sv('mix_rev','mix_rev_v','M');
+
+      // Products
+      products = config.products;
+      nextId = config.nextId || (Math.max(...products.map(p=>p.id)) + 1);
+
+      editingId = null;
+      recalc();
+
+      // Show toast
+      const toast = document.createElement('div');
+      toast.textContent = '✓ Import สำเร็จ — ' + products.length + ' สินค้า';
+      toast.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1A5C3A;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:999;';
+      document.body.appendChild(toast);
+      setTimeout(()=>toast.remove(), 2500);
+    } catch(err) {
+      alert('เกิดข้อผิดพลาด: ' + err.message);
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
 }
 
 function recalc(){
