@@ -5,168 +5,131 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Product Revenue Planner</title>
 <style>
-  :root {
-    --bg: #F7F6F2;
-    --surface: #FFFFFF;
-    --surface2: #F0EEE8;
-    --border: #E2DED6;
-    --border2: #CCCAB8;
-    --text: #1A1915;
-    --text2: #6B6860;
-    --text3: #9B998F;
-    --accent: #1A5C3A;
-    --accent-light: #EAF3E6;
-    --accent-mid: #2E7D52;
-    --warn: #B85C00;
-    --warn-light: #FFF3E8;
-    --danger: #A32020;
-    --danger-light: #FCEAEA;
-    --info: #1A4A7A;
-    --info-light: #EAF0FA;
-    --radius: 10px;
-    --radius-sm: 6px;
-    --mono: 'SF Mono', 'Fira Code', monospace;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+:root {
+  --bg:#F7F6F2;--surface:#FFFFFF;--surface2:#F0EEE8;--border:#E2DED6;--border2:#CCCAB8;
+  --text:#1A1915;--text2:#6B6860;--text3:#9B998F;
+  --accent:#1A5C3A;--accent-light:#EAF3E6;--accent-mid:#2E7D52;
+  --warn:#B85C00;--warn-light:#FFF3E8;
+  --danger:#A32020;--danger-light:#FCEAEA;
+  --info:#1A4A7A;--info-light:#EAF0FA;
+  --radius:10px;--radius-sm:6px;--mono:'SF Mono','Fira Code',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,'Helvetica Neue',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh;}
+.sidebar{background:var(--text);color:#F7F6F2;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;}
+.main{overflow-y:auto;padding-bottom:80px;}
+.sidebar-header{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid rgba(255,255,255,0.08);}
+.sidebar-logo{font-size:10px;letter-spacing:0.12em;color:rgba(255,255,255,0.35);text-transform:uppercase;margin-bottom:5px;}
+.sidebar-title{font-size:15px;font-weight:600;color:#fff;}
+.sidebar-nav{padding:1rem 0;flex:1;}
+.nav-section{font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.3);text-transform:uppercase;padding:0.75rem 1.25rem 0.4rem;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:0.55rem 1.25rem;font-size:13px;color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.15s;border-left:2px solid transparent;}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,0.06);}
+.nav-item.active{color:#fff;background:rgba(255,255,255,0.1);border-left-color:#5CB87A;}
+.nav-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.2);flex-shrink:0;}
+.nav-item.active .nav-dot{background:#5CB87A;}
+.page-header{padding:1.75rem 2rem 0;}
+.page-title{font-size:22px;font-weight:600;}
+.page-sub{font-size:13px;color:var(--text2);margin-top:4px;}
+.section{padding:1.5rem 2rem;display:none;}
+.section.active{display:block;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1rem;}
+.card-title{font-size:11px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);margin-bottom:1rem;}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px;margin-bottom:1.25rem;}
+.metric{background:var(--surface2);border-radius:var(--radius-sm);padding:0.875rem 1rem;}
+.metric-label{font-size:11px;color:var(--text3);margin-bottom:4px;}
+.metric-val{font-size:20px;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;}
+.metric-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.metric.good .metric-val{color:var(--accent);}
+.metric.warn .metric-val{color:var(--warn);}
+.metric.bad .metric-val{color:var(--danger);}
+.metric.info .metric-val{color:var(--info);}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:1rem;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12px;color:var(--text2);font-weight:500;}
+.field input[type=number],.field input[type=text],.field select{border:1px solid var(--border2);border-radius:var(--radius-sm);padding:7px 10px;font-size:13px;background:var(--surface);color:var(--text);outline:none;transition:border-color 0.15s;}
+.field input:focus,.field select:focus{border-color:var(--accent);}
+.field .hint{font-size:11px;color:var(--text3);}
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.slider-row label{font-size:12px;color:var(--text2);min-width:155px;}
+.slider-row input[type=range]{flex:1;accent-color:var(--accent);}
+.slider-row .val{font-size:12px;font-weight:600;color:var(--text);min-width:48px;text-align:right;font-family:var(--mono);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+@media(max-width:900px){.two-col{grid-template-columns:1fr;}}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:var(--radius-sm);font-size:13px;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:all 0.15s;}
+.btn:hover{background:var(--surface2);}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);}
+.btn-primary:hover{background:var(--accent-mid);}
+.btn-sm{padding:4px 10px;font-size:11px;}
+.btn-danger{background:var(--danger-light);color:var(--danger);border-color:#f0b0b0;}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;}
+.badge-green{background:var(--accent-light);color:var(--accent);}
+.badge-warn{background:var(--warn-light);color:var(--warn);}
+.badge-red{background:var(--danger-light);color:var(--danger);}
+.badge-info{background:var(--info-light);color:var(--info);}
+.verdict{border-radius:var(--radius);padding:1rem 1.25rem;margin-top:1rem;border-left:3px solid;}
+.verdict.good{background:var(--accent-light);border-color:var(--accent);}
+.verdict.warn{background:var(--warn-light);border-color:var(--warn);}
+.verdict.bad{background:var(--danger-light);border-color:var(--danger);}
+.verdict-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+.verdict.good .verdict-title{color:var(--accent);}
+.verdict.warn .verdict-title{color:var(--warn);}
+.verdict.bad .verdict-title{color:var(--danger);}
+.verdict-body{font-size:12px;color:var(--text2);line-height:1.6;}
+hr{border:none;border-top:1px solid var(--border);margin:1.25rem 0;}
+.summary-bar{background:var(--text);color:#fff;padding:1rem 2rem;display:flex;gap:2rem;align-items:center;position:fixed;bottom:0;left:240px;right:0;border-top:2px solid var(--accent);z-index:10;}
+.s-label{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.08em;}
+.s-val{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;}
+.s-val.good{color:#5CB87A;}
+.s-val.warn{color:#F5A623;}
+.s-val.bad{color:#E57373;}
 
-  /* Layout */
-  .app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
-  .sidebar { background: var(--text); color: #F7F6F2; padding: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; }
-  .main { overflow-y: auto; }
+/* Product cards */
+.product-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;}
+.pc-header{display:flex;justify-content:space-between;align-items:center;padding:0.875rem 1.25rem;border-bottom:1px solid var(--border);background:var(--surface2);}
+.pc-name{font-size:14px;font-weight:600;}
+.pc-body{padding:1.25rem;}
+.pc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:1rem;}
+.pc-stat{background:var(--surface2);border-radius:var(--radius-sm);padding:8px 10px;}
+.pc-stat-label{font-size:10px;color:var(--text3);margin-bottom:2px;}
+.pc-stat-val{font-size:14px;font-weight:600;}
 
-  /* Sidebar */
-  .sidebar-header { padding: 1.5rem 1.25rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
-  .sidebar-logo { font-size: 11px; letter-spacing: 0.12em; color: rgba(255,255,255,0.4); text-transform: uppercase; margin-bottom: 6px; }
-  .sidebar-title { font-size: 15px; font-weight: 600; color: #fff; }
-  .sidebar-nav { padding: 1rem 0; flex: 1; }
-  .nav-section { font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.3); text-transform: uppercase; padding: 0.75rem 1.25rem 0.4rem; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.55rem 1.25rem; font-size: 13px; color: rgba(255,255,255,0.65); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
-  .nav-item:hover { color: #fff; background: rgba(255,255,255,0.06); }
-  .nav-item.active { color: #fff; background: rgba(255,255,255,0.1); border-left-color: #5CB87A; }
-  .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.25); flex-shrink: 0; }
-  .nav-item.active .nav-dot { background: #5CB87A; }
+/* Channel mix per product */
+.ch-mix{margin-top:0.75rem;}
+.ch-mix-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;}
+.ch-row{display:grid;grid-template-columns:90px 1fr 60px 100px;align-items:center;gap:8px;margin-bottom:6px;}
+.ch-label{font-size:12px;color:var(--text2);}
+.ch-bar-wrap{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.ch-bar{height:100%;border-radius:3px;transition:width 0.3s;}
+.ch-pct{font-size:12px;font-weight:600;font-family:var(--mono);text-align:right;}
+.ch-input{width:64px;padding:3px 6px;border:1px solid var(--border2);border-radius:4px;font-size:12px;text-align:center;background:var(--surface);color:var(--text);}
 
-  /* Header */
-  .page-header { padding: 1.75rem 2rem 0; }
-  .page-title { font-size: 22px; font-weight: 600; color: var(--text); }
-  .page-sub { font-size: 13px; color: var(--text2); margin-top: 4px; }
+/* Waterfall */
+.wf-row{display:flex;align-items:center;gap:10px;font-size:12px;margin-bottom:4px;}
+.wf-label{min-width:160px;color:var(--text2);}
+.wf-bar-wrap{flex:1;height:20px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+.wf-bar{height:100%;border-radius:3px;transition:width 0.3s;}
+.wf-pct{font-family:var(--mono);font-size:11px;font-weight:600;min-width:44px;text-align:right;}
 
-  /* Tabs */
-  .tabs { display: flex; gap: 0; padding: 1.5rem 2rem 0; border-bottom: 1px solid var(--border); margin-bottom: 0; }
-  .tab { padding: 0.6rem 1.1rem; font-size: 13px; cursor: pointer; color: var(--text3); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--accent); font-weight: 500; border-bottom-color: var(--accent); }
+/* Dashboard channel table */
+.ch-table{width:100%;border-collapse:collapse;font-size:13px;}
+.ch-table th{text-align:left;font-size:11px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:var(--text3);padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);}
+.ch-table td{padding:0.7rem 0.75rem;border-bottom:1px solid var(--border);}
+.ch-table tr:last-child td{border-bottom:none;}
+.ch-table tr:hover td{background:var(--surface2);}
 
-  /* Sections */
-  .section { padding: 1.5rem 2rem; display: none; }
-  .section.active { display: block; }
-
-  /* Cards */
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
-  .card-title { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
-
-  /* Metric grid */
-  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
-  .metric { background: var(--surface2); border-radius: var(--radius-sm); padding: 0.875rem 1rem; }
-  .metric-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
-  .metric-val { font-size: 21px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
-  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-  .metric.good .metric-val { color: var(--accent); }
-  .metric.warn .metric-val { color: var(--warn); }
-  .metric.bad .metric-val { color: var(--danger); }
-  .metric.info .metric-val { color: var(--info); }
-
-  /* Form rows */
-  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 1rem; }
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label { font-size: 12px; color: var(--text2); font-weight: 500; }
-  .field input[type=number], .field input[type=text], .field select {
-    border: 1px solid var(--border2); border-radius: var(--radius-sm); padding: 7px 10px;
-    font-size: 13px; background: var(--surface); color: var(--text); outline: none;
-    transition: border-color 0.15s;
-  }
-  .field input:focus, .field select:focus { border-color: var(--accent); }
-  .field .hint { font-size: 11px; color: var(--text3); }
-
-  /* Slider rows */
-  .slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .slider-row label { font-size: 12px; color: var(--text2); min-width: 160px; }
-  .slider-row input[type=range] { flex: 1; accent-color: var(--accent); }
-  .slider-row .val { font-size: 12px; font-weight: 600; color: var(--text); min-width: 48px; text-align: right; font-family: var(--mono); }
-
-  /* Cost bar */
-  .cost-stack { margin: 1rem 0; }
-  .cost-bar { height: 28px; border-radius: var(--radius-sm); overflow: hidden; display: flex; margin-bottom: 8px; }
-  .bar-seg { height: 100%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; color: #fff; overflow: hidden; white-space: nowrap; transition: width 0.3s; min-width: 0; }
-  .cost-legend { display: flex; flex-wrap: wrap; gap: 10px; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text2); }
-  .legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-
-  /* Product table */
-  .product-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .product-table th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--text3); padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border); }
-  .product-table td { padding: 0.75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
-  .product-table tr:last-child td { border-bottom: none; }
-  .product-table tr:hover td { background: var(--surface2); }
-  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 500; }
-  .badge-green { background: var(--accent-light); color: var(--accent); }
-  .badge-warn { background: var(--warn-light); color: var(--warn); }
-  .badge-red { background: var(--danger-light); color: var(--danger); }
-  .badge-info { background: var(--info-light); color: var(--info); }
-
-  /* Verdict */
-  .verdict { border-radius: var(--radius); padding: 1rem 1.25rem; margin-top: 1rem; border-left: 3px solid; }
-  .verdict.good { background: var(--accent-light); border-color: var(--accent); }
-  .verdict.warn { background: var(--warn-light); border-color: var(--warn); }
-  .verdict.bad { background: var(--danger-light); border-color: var(--danger); }
-  .verdict-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-  .verdict.good .verdict-title { color: var(--accent); }
-  .verdict.warn .verdict-title { color: var(--warn); }
-  .verdict.bad .verdict-title { color: var(--danger); }
-  .verdict-body { font-size: 12px; color: var(--text2); line-height: 1.6; }
-
-  /* Two col */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-  @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
-
-  /* Buttons */
-  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; border: 1px solid var(--border2); background: var(--surface); color: var(--text); transition: all 0.15s; }
-  .btn:hover { background: var(--surface2); }
-  .btn-primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .btn-primary:hover { background: var(--accent-mid); }
-  .btn-sm { padding: 4px 10px; font-size: 12px; }
-  .btn-danger { background: var(--danger-light); color: var(--danger); border-color: #f0b0b0; }
-
-  /* Divider */
-  hr { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
-
-  /* Waterfall */
-  .waterfall { display: flex; flex-direction: column; gap: 4px; }
-  .wf-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
-  .wf-label { min-width: 160px; color: var(--text2); }
-  .wf-bar-wrap { flex: 1; height: 20px; background: var(--surface2); border-radius: 3px; overflow: hidden; position: relative; }
-  .wf-bar { height: 100%; border-radius: 3px; transition: width 0.3s; display: flex; align-items: center; padding-left: 6px; }
-  .wf-pct { font-family: var(--mono); font-size: 11px; font-weight: 600; min-width: 44px; text-align: right; color: var(--text); }
-
-  .row-actions { display: flex; gap: 6px; }
-  .tag { font-size: 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px; color: var(--text3); }
-
-  /* Summary bar */
-  .summary-bar { background: var(--text); color: #fff; padding: 1rem 2rem; display: flex; gap: 2rem; align-items: center; position: sticky; bottom: 0; border-top: 2px solid var(--accent); z-index: 10; }
-  .summary-item { text-align: center; }
-  .summary-item .s-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; }
-  .summary-item .s-val { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .summary-item .s-val.good { color: #5CB87A; }
-  .summary-item .s-val.warn { color: #F5A623; }
-  .summary-item .s-val.bad { color: #E57373; }
+/* cost stack */
+.cost-bar{height:24px;border-radius:var(--radius-sm);overflow:hidden;display:flex;margin-bottom:8px;}
+.bar-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;overflow:hidden;white-space:nowrap;transition:width 0.3s;min-width:0;}
+.cost-legend{display:flex;flex-wrap:wrap;gap:8px;}
+.legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2);}
+.legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0;}
 </style>
 </head>
 <body>
-
 <div class="app">
 
-<!-- Sidebar -->
 <aside class="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-logo">Revenue Planner</div>
@@ -184,136 +147,96 @@
   </nav>
 </aside>
 
-<!-- Main -->
 <div class="main">
 
 <!-- DASHBOARD -->
 <div id="tab-dashboard" class="section active">
-  <div class="page-header">
-    <div class="page-title">Dashboard</div>
-    <div class="page-sub">ภาพรวมสุขภาพการเงินของบริษัท</div>
-  </div>
-  <div style="padding: 1.5rem 2rem 0;">
+  <div class="page-header"><div class="page-title">Dashboard</div><div class="page-sub">ภาพรวมสุขภาพการเงินของบริษัท</div></div>
+  <div style="padding:1.5rem 2rem 0">
     <div class="metric-grid" id="dash-metrics"></div>
     <div class="two-col">
-      <div class="card">
-        <div class="card-title">Waterfall — ยอดขาย → กำไร</div>
-        <div class="waterfall" id="dash-waterfall"></div>
-      </div>
-      <div class="card">
-        <div class="card-title">Channel Breakdown</div>
-        <div id="dash-channels"></div>
-      </div>
+      <div class="card"><div class="card-title">Waterfall — ยอดขาย → กำไร</div><div id="dash-waterfall"></div></div>
+      <div class="card"><div class="card-title">Channel Breakdown (Weighted)</div><div id="dash-channels"></div></div>
     </div>
+    <div class="card"><div class="card-title">สินค้าแต่ละตัว</div><div id="dash-products"></div></div>
     <div id="dash-verdict"></div>
   </div>
 </div>
 
 <!-- COMPANY SETUP -->
 <div id="tab-company" class="section">
-  <div class="page-header">
-    <div class="page-title">Company Setup</div>
-    <div class="page-sub">ตั้งค่าพื้นฐานของบริษัท</div>
-  </div>
-  <div style="padding: 1.5rem 2rem 0;">
+  <div class="page-header"><div class="page-title">Company Setup</div><div class="page-sub">ตั้งค่าพื้นฐานของบริษัท</div></div>
+  <div style="padding:1.5rem 2rem 0">
     <div class="card">
       <div class="card-title">Fixed Cost & Target</div>
       <div class="form-grid">
-        <div class="field">
-          <label>Fixed Cost รวม/เดือน (บาท)</label>
-          <input type="number" id="c_fixed" value="1200000" step="50000" oninput="recalc()">
-        </div>
-        <div class="field">
-          <label>Target Net Margin (%)</label>
-          <input type="number" id="c_target" value="10" min="1" max="50" oninput="recalc()">
-        </div>
+        <div class="field"><label>Fixed Cost รวม/เดือน (บาท)</label><input type="number" id="c_fixed" value="1200000" step="50000" oninput="recalc()"></div>
+        <div class="field"><label>Target Net Margin (%)</label><input type="number" id="c_target" value="10" min="1" max="50" oninput="recalc()"></div>
       </div>
     </div>
     <div class="card">
-      <div class="card-title">ค่าเริ่มต้นช่องทาง Facebook</div>
-      <div class="slider-row"><label>ค่าแอด (%)</label><input type="range" id="c_fb_ads" min="10" max="80" step="0.5" value="45" oninput="syncSlider('c_fb_ads','c_fb_ads_v');recalc()"><span class="val" id="c_fb_ads_v">45.0%</span></div>
-    </div>
-    <div class="card">
-      <div class="card-title">ช่องทาง CRM / โทร</div>
-      <div class="form-grid">
-        <div class="field">
-          <label>สัดส่วน Fixed Cost ที่แบก (%)</label>
-          <input type="number" id="c_crm_fixed_pct" value="28.2" step="0.1" oninput="recalc()">
-          <span class="hint">คำนวณจาก (% ยอด CRM) × Fixed Cost / ยอด CRM</span>
-        </div>
-      </div>
+      <div class="card-title">ค่า Default ช่องทาง</div>
+      <div class="slider-row"><label>ค่าแอด Facebook (%)</label><input type="range" id="c_fb_ads" min="10" max="80" step="0.5" value="45" oninput="sv('c_fb_ads','c_fb_ads_v',true);recalc()"><span class="val" id="c_fb_ads_v">45.0%</span></div>
+      <div class="slider-row"><label>ค่าใช้จ่าย Line/Repeat (%)</label><input type="range" id="c_line_cost" min="0" max="30" step="0.5" value="10" oninput="sv('c_line_cost','c_line_cost_v',true);recalc()"><span class="val" id="c_line_cost_v">10.0%</span></div>
+      <div class="slider-row"><label>Fixed Cost allocation CRM (%)</label><input type="range" id="c_crm_fc" min="5" max="50" step="0.5" value="28.2" oninput="sv('c_crm_fc','c_crm_fc_v',true);recalc()"><span class="val" id="c_crm_fc_v">28.2%</span></div>
     </div>
   </div>
 </div>
 
 <!-- PRODUCTS -->
 <div id="tab-products" class="section">
-  <div class="page-header">
-    <div class="page-title">สินค้าทั้งหมด</div>
-    <div class="page-sub">เพิ่ม/แก้ไขสินค้าและดูความคุ้มค่าของแต่ละตัว</div>
-  </div>
-  <div style="padding: 1.5rem 2rem 0;">
+  <div class="page-header"><div class="page-title">สินค้าทั้งหมด</div><div class="page-sub">กำหนดต้นทุน ช่องทาง และสัดส่วนยอดขายของแต่ละสินค้า</div></div>
+  <div style="padding:1.5rem 2rem 0">
     <div class="card">
       <div class="card-title">เพิ่มสินค้าใหม่</div>
       <div class="form-grid">
         <div class="field"><label>ชื่อสินค้า</label><input type="text" id="p_name" placeholder="เช่น TSK กลูต้า"></div>
-        <div class="field"><label>ราคาขายเฉลี่ย/บิล (บาท)</label><input type="number" id="p_price" value="1500" step="100"></div>
+        <div class="field"><label>AOV เฉลี่ย/บิล (บาท)</label><input type="number" id="p_aov" value="1500" step="100"></div>
         <div class="field"><label>ต้นทุนสินค้า (%)</label><input type="number" id="p_cogs" value="52" step="0.5"></div>
         <div class="field"><label>VAT (%)</label><input type="number" id="p_vat" value="2.5" step="0.5"></div>
         <div class="field"><label>Shipping (%)</label><input type="number" id="p_ship" value="4.7" step="0.5"></div>
         <div class="field"><label>Coupon (%)</label><input type="number" id="p_coupon" value="5" step="0.5"></div>
+        <div class="field"><label>Return Rate (%)</label><input type="number" id="p_ret" value="2" step="0.5"></div>
         <div class="field"><label>ประเภท</label>
-          <select id="p_type">
-            <option value="main">สินค้าหลัก</option>
-            <option value="partner">สินค้า Partner</option>
-            <option value="upsell">Upsell / Bundle</option>
-          </select>
+          <select id="p_type"><option value="main">สินค้าหลัก</option><option value="partner">Partner</option><option value="upsell">Upsell/Bundle</option></select>
         </div>
-        <div class="field"><label>Return Rate (%)</label><input type="number" id="p_return" value="2" step="0.5"></div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div class="card-title" style="margin-bottom:8px">สัดส่วนช่องทาง (รวม 100%)</div>
+        <div class="form-grid">
+          <div class="field"><label>Facebook (%)</label><input type="number" id="p_fb" value="50" min="0" max="100"></div>
+          <div class="field"><label>CRM / โทร (%)</label><input type="number" id="p_crm" value="50" min="0" max="100"></div>
+          <div class="field"><label>Line / Repeat (%)</label><input type="number" id="p_line" value="0" min="0" max="100"></div>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field"><label>สัดส่วนยอดขายใน Portfolio (%)</label><input type="number" id="p_share" value="50" min="0" max="100"><span class="hint">ใช้คำนวณ Blended CM รวม</span></div>
       </div>
       <button class="btn btn-primary" onclick="addProduct()">+ เพิ่มสินค้า</button>
     </div>
-    <div class="card">
-      <div class="card-title">รายการสินค้า</div>
-      <table class="product-table" id="product-table">
-        <thead><tr>
-          <th>สินค้า</th><th>ราคา</th><th>Var Cost</th>
-          <th>CM (FB)</th><th>CM (CRM)</th><th>Return</th><th>สถานะ</th><th></th>
-        </tr></thead>
-        <tbody id="product-tbody"></tbody>
-      </table>
-    </div>
+    <div id="product-list"></div>
   </div>
 </div>
 
-<!-- 2-BILL SIMULATOR -->
+<!-- 2-BILL -->
 <div id="tab-2bill" class="section">
-  <div class="page-header">
-    <div class="page-title">2-Bill Simulator</div>
-    <div class="page-sub">จำลอง Model Bill 1 (Facebook) → Bill 2 (CRM)</div>
-  </div>
-  <div style="padding: 1.5rem 2rem 0;">
+  <div class="page-header"><div class="page-title">2-Bill Simulator</div><div class="page-sub">จำลอง Model Bill 1 (Facebook) → Bill 2 (CRM)</div></div>
+  <div style="padding:1.5rem 2rem 0">
     <div class="two-col">
       <div class="card">
         <div class="card-title">Bill 1 — Facebook</div>
-        <div class="field" style="margin-bottom:10px">
-          <label>เลือกสินค้า Bill 1</label>
-          <select id="sim_p1" onchange="simRecalc()"></select>
-        </div>
-        <div class="slider-row"><label>ยอดขาย Bill 1 (ล้าน)</label><input type="range" id="sim_b1" min="0.5" max="20" step="0.1" value="2" oninput="syncSlider('sim_b1','sim_b1_v');simRecalc()"><span class="val" id="sim_b1_v">2.0M</span></div>
-        <div class="slider-row"><label>ค่าแอด (%)</label><input type="range" id="sim_ads" min="10" max="80" step="0.5" value="45" oninput="syncSlider('sim_ads','sim_ads_v');simRecalc()"><span class="val" id="sim_ads_v">45.0%</span></div>
-        <div id="sim_b1_cost" class="cost-stack"></div>
+        <div class="field" style="margin-bottom:10px"><label>สินค้า Bill 1</label><select id="sim_p1" onchange="simRecalc()"></select></div>
+        <div class="slider-row"><label>ยอดขาย Bill 1 (ล้าน)</label><input type="range" id="sim_b1" min="0.5" max="20" step="0.1" value="2" oninput="sv('sim_b1','sim_b1_v','M');simRecalc()"><span class="val" id="sim_b1_v">2.0M</span></div>
+        <div class="slider-row"><label>ค่าแอด (%)</label><input type="range" id="sim_ads" min="10" max="80" step="0.5" value="45" oninput="sv('sim_ads','sim_ads_v',true);simRecalc()"><span class="val" id="sim_ads_v">45.0%</span></div>
+        <div id="sim_b1_cost"></div>
       </div>
       <div class="card">
         <div class="card-title">Bill 2 — CRM</div>
-        <div class="field" style="margin-bottom:10px">
-          <label>เลือกสินค้า Bill 2</label>
-          <select id="sim_p2" onchange="simRecalc()"></select>
-        </div>
-        <div class="slider-row"><label>AOV Bill 2 (บาท)</label><input type="range" id="sim_b2_aov" min="500" max="10000" step="100" value="1618" oninput="syncSlider('sim_b2_aov','sim_b2_aov_v');simRecalc()"><span class="val" id="sim_b2_aov_v">1,618</span></div>
-        <div class="slider-row"><label>Leads จาก Facebook</label><input type="range" id="sim_leads" min="100" max="5000" step="50" value="1137" oninput="syncSlider('sim_leads','sim_leads_v');simRecalc()"><span class="val" id="sim_leads_v">1,137</span></div>
-        <div class="slider-row"><label>Conversion rate (%)</label><input type="range" id="sim_conv" min="1" max="100" step="1" value="7" oninput="syncSlider('sim_conv','sim_conv_v');simRecalc()"><span class="val" id="sim_conv_v">7%</span></div>
-        <div id="sim_b2_cost" class="cost-stack"></div>
+        <div class="field" style="margin-bottom:10px"><label>สินค้า Bill 2</label><select id="sim_p2" onchange="simRecalc()"></select></div>
+        <div class="slider-row"><label>AOV Bill 2 (บาท)</label><input type="range" id="sim_aov" min="500" max="10000" step="100" value="1618" oninput="sv('sim_aov','sim_aov_v','n');simRecalc()"><span class="val" id="sim_aov_v">1,618</span></div>
+        <div class="slider-row"><label>Leads จาก Facebook</label><input type="range" id="sim_leads" min="100" max="5000" step="50" value="1137" oninput="sv('sim_leads','sim_leads_v','n');simRecalc()"><span class="val" id="sim_leads_v">1,137</span></div>
+        <div class="slider-row"><label>Conversion rate (%)</label><input type="range" id="sim_conv" min="1" max="100" step="1" value="7" oninput="sv('sim_conv','sim_conv_v',true);simRecalc()"><span class="val" id="sim_conv_v">7.0%</span></div>
+        <div id="sim_b2_cost"></div>
       </div>
     </div>
     <div class="card">
@@ -321,399 +244,372 @@
       <div class="metric-grid" id="sim-metrics"></div>
       <div id="sim-verdict"></div>
       <hr>
-      <div style="font-size:12px; color:var(--text2); margin-bottom:8px; font-weight:600;">Conversion ที่ต้องการเพื่อถึง Target</div>
-      <div id="sim-conv-table"></div>
+      <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:8px">Conversion scenarios</div>
+      <div id="sim-table"></div>
     </div>
   </div>
 </div>
 
 <!-- REVENUE MIX -->
 <div id="tab-mix" class="section">
-  <div class="page-header">
-    <div class="page-title">Revenue Mix</div>
-    <div class="page-sub">กำหนดสัดส่วนยอดขายแต่ละช่องทางและดูผลกระทบ</div>
+  <div class="page-header"><div class="page-title">Revenue Mix</div><div class="page-sub">ภาพรวม Weighted CM จากทุกสินค้าและช่องทาง</div></div>
+  <div style="padding:1.5rem 2rem 0">
+    <div class="card" style="background:var(--info-light);border-color:#b5cde8">
+      <div style="font-size:13px;color:var(--info)">ปรับสัดส่วนช่องทางและ % ใน Portfolio ของแต่ละสินค้าได้ที่หน้า <strong>สินค้าทั้งหมด</strong> แล้วผลจะ reflect มาที่นี่อัตโนมัติ</div>
+    </div>
+    <div class="card"><div class="card-title">Weighted Blended CM</div><div class="metric-grid" id="mix-metrics"></div></div>
+    <div class="card"><div class="card-title">สรุปตามสินค้า</div><div id="mix-product-table"></div></div>
+    <div class="card"><div class="card-title">สรุปตามช่องทาง</div><div id="mix-channel-table"></div></div>
+    <div class="card">
+      <div class="card-title">Scenario — ปรับ Target</div>
+      <div class="slider-row"><label>ยอดขายจริง/เดือน (ล้าน)</label><input type="range" id="mix_rev" min="1" max="30" step="0.5" value="6.9" oninput="sv('mix_rev','mix_rev_v','M');mixRecalc()"><span class="val" id="mix_rev_v">6.9M</span></div>
+      <div id="mix-scenario"></div>
+    </div>
+    <div id="mix-verdict"></div>
   </div>
-  <div style="padding: 1.5rem 2rem 0;">
-    <div class="card">
-      <div class="card-title">สัดส่วนช่องทาง (รวม 100%)</div>
-      <div class="slider-row"><label>Facebook (%)</label><input type="range" id="mix_fb" min="0" max="100" step="5" value="50" oninput="mixSync();mixRecalc()"><span class="val" id="mix_fb_v">50%</span></div>
-      <div class="slider-row"><label>CRM / โทร (%)</label><input type="range" id="mix_crm" min="0" max="100" step="5" value="50" oninput="mixSync();mixRecalc()"><span class="val" id="mix_crm_v">50%</span></div>
-      <div class="slider-row"><label>Line / Repeat (%)</label><input type="range" id="mix_line" min="0" max="100" step="5" value="0" oninput="mixSync();mixRecalc()"><span class="val" id="mix_line_v">0%</span></div>
-      <div style="font-size:11px;color:var(--text3);margin-top:-4px" id="mix_sum_warn"></div>
-    </div>
-    <div class="card">
-      <div class="card-title">Line / Repeat Channel</div>
-      <div class="slider-row"><label>ค่าใช้จ่าย Line (%)</label><input type="range" id="mix_line_cost" min="0" max="30" step="0.5" value="10" oninput="syncSlider('mix_line_cost','mix_line_cost_v');mixRecalc()"><span class="val" id="mix_line_cost_v">10.0%</span></div>
-    </div>
-    <div class="card">
-      <div class="card-title">เลือกสินค้าหลักที่ขาย</div>
-      <div class="field">
-        <label>สินค้า (ใช้ต้นทุนจากสินค้านี้คำนวณ)</label>
-        <select id="mix_product" onchange="mixRecalc()"></select>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">ผลการวิเคราะห์</div>
-      <div class="metric-grid" id="mix-metrics"></div>
-      <hr>
-      <div style="font-size:12px;color:var(--text2);font-weight:600;margin-bottom:10px;">ยอดขาย Breakeven ตามสัดส่วน</div>
-      <div id="mix-table"></div>
-      <div id="mix-verdict"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Summary Bar -->
-<div class="summary-bar" id="summary-bar">
-  <div class="summary-item"><div class="s-label">ยอดขาย/เดือน</div><div class="s-val" id="sb_rev">—</div></div>
-  <div class="summary-item"><div class="s-label">Blended CM</div><div class="s-val" id="sb_cm">—</div></div>
-  <div class="summary-item"><div class="s-label">กำไรสุทธิ</div><div class="s-val" id="sb_profit">—</div></div>
-  <div class="summary-item"><div class="s-label">Net Margin</div><div class="s-val" id="sb_margin">—</div></div>
-  <div class="summary-item"><div class="s-label">ยอด Breakeven</div><div class="s-val" id="sb_be">—</div></div>
 </div>
 
 </div><!-- /main -->
-</div><!-- /app -->
+
+<div class="summary-bar">
+  <div><div class="s-label">Blended CM</div><div class="s-val" id="sb_cm">—</div></div>
+  <div><div class="s-label">ยอด Breakeven</div><div class="s-val" id="sb_be">—</div></div>
+  <div><div class="s-label">ยอดเพื่อ Target</div><div class="s-val" id="sb_target_rev">—</div></div>
+  <div><div class="s-label">Net (ยอดจริง)</div><div class="s-val" id="sb_net">—</div></div>
+  <div><div class="s-label">Net Margin</div><div class="s-val" id="sb_margin">—</div></div>
+</div>
+</div>
 
 <script>
-const fmt = n => Math.round(n).toLocaleString('th-TH');
-const pct = n => n.toFixed(1) + '%';
-const $ = id => document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString('th-TH');
+const pct=n=>parseFloat(n).toFixed(1)+'%';
+const $=id=>document.getElementById(id);
+const gv=id=>parseFloat($(id).value)||0;
 
-// State
-let products = [
-  { id:1, name:'สินค้าหลัก (ยันฮี)', price:1500, cogs:47, vat:2.5, ship:2.5, coupon:2.5, type:'main', ret:1.5 },
-  { id:2, name:'หมอของขวัญ (TSK)', price:1531, cogs:52, vat:2.5, ship:4.7, coupon:5, type:'partner', ret:3.1 },
+let products=[
+  {id:1,name:'สินค้าหลัก (ยันฮี)',aov:1500,cogs:47,vat:2.5,ship:2.5,coupon:2.5,ret:1.5,type:'main',fb:50,crm:50,line:0,share:75},
+  {id:2,name:'หมอของขวัญ (TSK)',aov:1531,cogs:52,vat:2.5,ship:4.7,coupon:5,ret:3.1,type:'partner',fb:70,crm:30,line:0,share:25},
 ];
-let nextId = 3;
+let nid=3;
 
-function varCost(p) { return p.cogs + p.vat + p.ship + p.coupon; }
-function cmFB(p) { const ads = parseFloat($('c_fb_ads').value)||45; return 100 - varCost(p) - ads; }
-function cmCRM(p) { const fc = parseFloat($('c_crm_fixed_pct').value)||28.2; return 100 - varCost(p) - fc; }
-
-function syncSlider(id, vid) {
-  const v = parseFloat($(id).value);
-  const el = $(vid);
-  if (id.includes('b1') && id.includes('sim')) el.textContent = v.toFixed(1)+'M';
-  else if (id.includes('aov') || id.includes('leads')) el.textContent = fmt(v);
-  else if (id.includes('conv')) el.textContent = v+'%';
-  else el.textContent = v.toFixed(1)+'%';
+function sv(id,vid,mode){
+  const v=parseFloat($(id).value);
+  const el=$(vid);
+  if(mode==='M') el.textContent=v.toFixed(1)+'M';
+  else if(mode==='n') el.textContent=fmt(v);
+  else if(mode===true) el.textContent=v.toFixed(1)+'%';
 }
 
-function showTab(name) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+function vc(p){return p.cogs+p.vat+p.ship+p.coupon;}
+function cmFB(p){return 100-vc(p)-gv('c_fb_ads');}
+function cmCRM(p){return 100-vc(p)-gv('c_crm_fc');}
+function cmLine(p){return 100-vc(p)-gv('c_line_cost');}
+function cmBlendedProduct(p){
+  const total=p.fb+p.crm+p.line;
+  if(total===0) return 0;
+  return (cmFB(p)*(p.fb/total)+cmCRM(p)*(p.crm/total)+cmLine(p)*(p.line/total));
+}
+
+function showTab(name){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   $('tab-'+name).classList.add('active');
-  const items = document.querySelectorAll('.nav-item');
-  items.forEach(i => { if(i.getAttribute('onclick').includes(name)) i.classList.add('active'); });
+  document.querySelectorAll('.nav-item').forEach(i=>{if(i.getAttribute('onclick').includes(name))i.classList.add('active');});
   recalc();
 }
 
-function statusBadge(cmFb, cmCrm, ret) {
-  if (cmFb >= 0 && cmCrm >= 10) return '<span class="badge badge-green">ดี</span>';
-  if (cmFb >= -5 && cmCrm >= 5) return '<span class="badge badge-warn">ระวัง</span>';
-  if (cmCrm < 5) return '<span class="badge badge-red">ขาดทุน CRM</span>';
-  return '<span class="badge badge-info">Loss Leader</span>';
+function statusBadge(cm){
+  if(cm>=15) return '<span class="badge badge-green">ดีมาก</span>';
+  if(cm>=5) return '<span class="badge badge-green">ดี</span>';
+  if(cm>=0) return '<span class="badge badge-warn">ระวัง</span>';
+  return '<span class="badge badge-red">ขาดทุน</span>';
 }
 
-function renderProducts() {
-  const ads = parseFloat($('c_fb_ads').value)||45;
-  const fc = parseFloat($('c_crm_fixed_pct').value)||28.2;
-  const tbody = $('product-tbody');
-  tbody.innerHTML = products.map(p => {
-    const vc = varCost(p);
-    const cfb = (100 - vc - ads);
-    const ccrm = (100 - vc - fc);
-    const typeLbl = p.type==='main'?'หลัก':p.type==='partner'?'Partner':'Upsell';
-    return `<tr>
-      <td><strong>${p.name}</strong> <span class="tag">${typeLbl}</span></td>
-      <td>${fmt(p.price)}</td>
-      <td>${vc.toFixed(1)}%</td>
-      <td style="color:${cfb>=0?'var(--accent)':'var(--danger)'};font-weight:600">${cfb.toFixed(1)}%</td>
-      <td style="color:${ccrm>=5?'var(--accent)':'var(--danger)'};font-weight:600">${ccrm.toFixed(1)}%</td>
-      <td style="color:${p.ret>3?'var(--danger)':p.ret>2?'var(--warn)':'var(--text2)'}">${p.ret}%</td>
-      <td>${statusBadge(cfb,ccrm,p.ret)}</td>
-      <td><button class="btn btn-sm btn-danger" onclick="removeProduct(${p.id})">ลบ</button></td>
-    </tr>`;
+function costBar(segs){
+  const cols=['#2D6A4F','#52B788','#74C69D','#40916C','#E57373','#F5A623','#7986CB','#9575CD','#5CB87A'];
+  let h='<div class="cost-bar">';
+  segs.forEach((s,i)=>{const w=Math.min(Math.max(s.v,0),100);h+=`<div class="bar-seg" style="width:${w}%;background:${cols[i%cols.length]}">${w>7?s.l:''}</div>`;});
+  h+='</div><div class="cost-legend">';
+  segs.forEach((s,i)=>h+=`<div class="legend-item"><div class="legend-dot" style="background:${cols[i%cols.length]}"></div>${s.l}: ${s.v.toFixed(1)}%</div>`);
+  return h+'</div>';
+}
+
+function renderProducts(){
+  const list=$('product-list');
+  if(!list) return;
+  list.innerHTML=products.map(p=>{
+    const cfb=cmFB(p),ccrm=cmCRM(p),cline=cmLine(p),cblend=cmBlendedProduct(p);
+    const chTotal=p.fb+p.crm+p.line;
+    const chWarn=Math.abs(chTotal-100)>1?`<span style="color:var(--warn);font-size:11px"> ⚠ รวม ${chTotal}%</span>`:'';
+    return `<div class="product-card">
+      <div class="pc-header">
+        <div class="pc-name">${p.name} <span class="badge badge-info" style="margin-left:6px;font-size:10px">${p.type==='main'?'หลัก':p.type==='partner'?'Partner':'Upsell'}</span></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          ${statusBadge(cblend)}
+          <button class="btn btn-sm btn-danger" onclick="removeProduct(${p.id})">ลบ</button>
+        </div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-grid">
+          <div class="pc-stat"><div class="pc-stat-label">AOV</div><div class="pc-stat-val">${fmt(p.aov)} ฿</div></div>
+          <div class="pc-stat"><div class="pc-stat-label">Var Cost</div><div class="pc-stat-val">${vc(p).toFixed(1)}%</div></div>
+          <div class="pc-stat"><div class="pc-stat-label">CM (FB)</div><div class="pc-stat-val" style="color:${cfb>=0?'var(--accent)':'var(--danger)'}">${cfb.toFixed(1)}%</div></div>
+          <div class="pc-stat"><div class="pc-stat-label">CM (CRM)</div><div class="pc-stat-val" style="color:${ccrm>=0?'var(--accent)':'var(--danger)'}">${ccrm.toFixed(1)}%</div></div>
+          <div class="pc-stat"><div class="pc-stat-label">CM (Line)</div><div class="pc-stat-val" style="color:${cline>=0?'var(--accent)':'var(--danger)'}">${cline.toFixed(1)}%</div></div>
+          <div class="pc-stat"><div class="pc-stat-label">CM Blended</div><div class="pc-stat-val" style="color:${cblend>=5?'var(--accent)':cblend>=0?'var(--warn)':'var(--danger)'}">${cblend.toFixed(1)}%</div></div>
+          <div class="pc-stat"><div class="pc-stat-label">Return Rate</div><div class="pc-stat-val" style="color:${p.ret>3?'var(--danger)':p.ret>2?'var(--warn)':'var(--text)'}">${p.ret}%</div></div>
+          <div class="pc-stat"><div class="pc-stat-label">Portfolio %</div><div class="pc-stat-val">${p.share}%</div></div>
+        </div>
+        <div class="ch-mix">
+          <div class="ch-mix-title">สัดส่วนช่องทาง ${chWarn}</div>
+          ${[['Facebook','fb','#185FA5',cfb],['CRM/โทร','crm','#1A5C3A',ccrm],['Line/Repeat','line','#7C3AED',cline]].map(([lbl,key,col,cm])=>`
+          <div class="ch-row">
+            <div class="ch-label">${lbl}</div>
+            <div class="ch-bar-wrap"><div class="ch-bar" style="width:${p[key]}%;background:${col}"></div></div>
+            <div class="ch-pct" style="color:${cm>=0?'var(--text)':'var(--danger)'}">${cm.toFixed(0)}%CM</div>
+            <input class="ch-input" type="number" value="${p[key]}" min="0" max="100"
+              onchange="updateChannel(${p.id},'${key}',this.value)">
+          </div>`).join('')}
+          <div style="margin-top:8px;display:flex;align-items:center;gap:8px">
+            <span style="font-size:12px;color:var(--text2)">สัดส่วนใน Portfolio</span>
+            <input class="ch-input" style="width:70px" type="number" value="${p.share}" min="0" max="100"
+              onchange="updateShare(${p.id},this.value)">
+            <span style="font-size:11px;color:var(--text3)">% ของยอดขายรวม</span>
+          </div>
+        </div>
+      </div>
+    </div>`;
   }).join('');
 
-  // Update selects
-  ['sim_p1','sim_p2','mix_product'].forEach(sid => {
-    const sel = $(sid);
-    if (!sel) return;
-    const cur = sel.value;
-    sel.innerHTML = products.map(p => `<option value="${p.id}" ${p.id==cur?'selected':''}>${p.name}</option>`).join('');
+  ['sim_p1','sim_p2'].forEach(sid=>{
+    const sel=$(sid);if(!sel)return;
+    const cur=sel.value;
+    sel.innerHTML=products.map(p=>`<option value="${p.id}" ${p.id==cur?'selected':''}>${p.name}</option>`).join('');
   });
 }
 
-function addProduct() {
-  const name = $('p_name').value.trim();
-  if (!name) { alert('กรุณาใส่ชื่อสินค้า'); return; }
-  products.push({
-    id: nextId++,
-    name, price: parseFloat($('p_price').value)||1500,
-    cogs: parseFloat($('p_cogs').value)||52,
-    vat: parseFloat($('p_vat').value)||2.5,
-    ship: parseFloat($('p_ship').value)||4.7,
-    coupon: parseFloat($('p_coupon').value)||5,
-    type: $('p_type').value,
-    ret: parseFloat($('p_return').value)||2,
-  });
-  $('p_name').value = '';
+function updateChannel(id,key,val){
+  const p=products.find(x=>x.id===id);
+  if(p){p[key]=parseFloat(val)||0;recalc();}
+}
+function updateShare(id,val){
+  const p=products.find(x=>x.id===id);
+  if(p){p.share=parseFloat(val)||0;recalc();}
+}
+
+function addProduct(){
+  const name=$('p_name').value.trim();
+  if(!name){alert('กรุณาใส่ชื่อสินค้า');return;}
+  const fb=parseFloat($('p_fb').value)||0;
+  const crm=parseFloat($('p_crm').value)||0;
+  const line=parseFloat($('p_line').value)||0;
+  products.push({id:nid++,name,aov:gv('p_aov'),cogs:gv('p_cogs'),vat:gv('p_vat'),ship:gv('p_ship'),coupon:gv('p_coupon'),ret:gv('p_ret'),type:$('p_type').value,fb,crm,line,share:gv('p_share')});
+  $('p_name').value='';
   recalc();
 }
+function removeProduct(id){products=products.filter(p=>p.id!==id);recalc();}
 
-function removeProduct(id) {
-  products = products.filter(p => p.id != id);
-  recalc();
+// Weighted blended CM across all products
+function globalBlendedCM(){
+  const totalShare=products.reduce((a,p)=>a+p.share,0);
+  if(totalShare===0) return 0;
+  return products.reduce((a,p)=>a+(cmBlendedProduct(p)*(p.share/totalShare)),0);
 }
 
-function costBar(segs) {
-  const colors = ['#2D6A4F','#52B788','#B7E4C7','#74C69D','#40916C','#1B4332','#95D5B2'];
-  const total = segs.reduce((a,s)=>a+s.val,0);
-  let html = '<div class="cost-bar">';
-  segs.forEach((s,i) => {
-    const w = Math.min(Math.max(s.val,0),100);
-    html += `<div class="bar-seg" style="width:${w}%;background:${colors[i%colors.length]}">${w>8?s.label:''}</div>`;
+// Channel weighted totals
+function channelSummary(){
+  const totalShare=products.reduce((a,p)=>a+p.share,0);
+  if(totalShare===0) return {fb:0,crm:0,line:0};
+  let fb=0,crm=0,line=0;
+  products.forEach(p=>{
+    const ch=p.fb+p.crm+p.line||1;
+    const w=p.share/totalShare;
+    fb+=p.fb/ch*w;crm+=p.crm/ch*w;line+=p.line/ch*w;
   });
-  html += '</div><div class="cost-legend">';
-  segs.forEach((s,i) => {
-    html += `<div class="legend-item"><div class="legend-dot" style="background:${colors[i%colors.length]}"></div>${s.label}: ${s.val.toFixed(1)}%</div>`;
-  });
-  html += '</div>';
-  return html;
+  return {fb:fb*100,crm:crm*100,line:line*100};
 }
 
-function simRecalc() {
-  const p1id = parseInt($('sim_p1').value);
-  const p2id = parseInt($('sim_p2').value);
-  const p1 = products.find(p=>p.id===p1id) || products[0];
-  const p2 = products.find(p=>p.id===p2id) || products[0];
-  if (!p1||!p2) return;
+function simRecalc(){
+  const p1id=parseInt($('sim_p1').value);
+  const p2id=parseInt($('sim_p2').value);
+  const p1=products.find(p=>p.id===p1id)||products[0];
+  const p2=products.find(p=>p.id===p2id)||products[0];
+  if(!p1||!p2) return;
+  const b1Rev=gv('sim_b1')*1000000;
+  const ads=gv('sim_ads');
+  const fc=gv('c_crm_fc');
+  const b2Aov=gv('sim_aov');
+  const leads=gv('sim_leads');
+  const conv=gv('sim_conv');
+  const target=gv('c_target');
+  const b1m=100-vc(p1)-ads;
+  const b2m=100-vc(p2)-fc;
+  const b1p=b1Rev*b1m/100;
+  const convOrd=Math.round(leads*conv/100);
+  const b2Rev=convOrd*b2Aov;
+  const b2p=b2Rev*b2m/100;
+  const totalRev=b1Rev+b2Rev;
+  const net=b1p+b2p;
+  const netPct=totalRev>0?net/totalRev*100:0;
 
-  const b1Rev = parseFloat($('sim_b1').value)*1000000;
-  const ads = parseFloat($('sim_ads').value);
-  const fc = parseFloat($('c_crm_fixed_pct').value)||28.2;
-  const b2Aov = parseFloat($('sim_b2_aov').value);
-  const leads = parseFloat($('sim_leads').value);
-  const conv = parseFloat($('sim_conv').value);
-  const target = parseFloat($('c_target').value)||10;
+  $('sim_b1_cost').innerHTML=costBar([{l:'สินค้า',v:p1.cogs},{l:'VAT',v:p1.vat},{l:'ส่ง',v:p1.ship},{l:'Coupon',v:p1.coupon},{l:'แอด',v:ads},{l:'กำไร',v:Math.max(b1m,0)}]);
+  $('sim_b2_cost').innerHTML=costBar([{l:'สินค้า',v:p2.cogs},{l:'VAT',v:p2.vat},{l:'ส่ง',v:p2.ship},{l:'Coupon',v:p2.coupon},{l:'Fixed',v:fc},{l:'กำไร',v:Math.max(b2m,0)}]);
 
-  const vc1 = varCost(p1);
-  const vc2 = varCost(p2);
-  const b1Margin = 100 - vc1 - ads;
-  const b2Margin = 100 - vc2 - fc;
-  const b1Profit = b1Rev * b1Margin / 100;
+  $('sim-metrics').innerHTML=[
+    {l:'Bill 1 Margin',v:b1m.toFixed(1)+'%',c:b1m>=-1?'good':'bad'},
+    {l:'Bill 2 Margin',v:b2m.toFixed(1)+'%',c:b2m>=10?'good':b2m>=0?'warn':'bad'},
+    {l:'กำไร Bill 1',v:(b1p>=0?'+':'')+fmt(b1p),c:b1p>=0?'good':'bad'},
+    {l:'กำไร Bill 2',v:(b2p>=0?'+':'')+fmt(b2p),c:b2p>=0?'good':'warn'},
+    {l:'Net รวม',v:(net>=0?'+':'')+fmt(net),c:net>=0?'good':'bad'},
+    {l:'Net Margin',v:netPct.toFixed(1)+'%',c:netPct>=target?'good':netPct>=0?'warn':'bad'},
+  ].map(m=>`<div class="metric ${m.c}"><div class="metric-label">${m.l}</div><div class="metric-val">${m.v}</div></div>`).join('');
 
-  const convOrders = Math.round(leads * conv / 100);
-  const b2Rev = convOrders * b2Aov;
-  const b2Profit = b2Rev * b2Margin / 100;
-  const totalRev = b1Rev + b2Rev;
-  const netProfit = b1Profit + b2Profit;
-  const netPct = totalRev > 0 ? netProfit/totalRev*100 : 0;
-
-  $('sim_b1_cost').innerHTML = costBar([
-    {label:'สินค้า',val:p1.cogs},{label:'VAT',val:p1.vat},{label:'ส่ง',val:p1.ship},
-    {label:'Coupon',val:p1.coupon},{label:'แอด',val:ads},{label:'กำไร',val:Math.max(b1Margin,0)}
-  ]);
-  $('sim_b2_cost').innerHTML = costBar([
-    {label:'สินค้า',val:p2.cogs},{label:'VAT',val:p2.vat},{label:'ส่ง',val:p2.ship},
-    {label:'Coupon',val:p2.coupon},{label:'Fixed',val:fc},{label:'กำไร',val:Math.max(b2Margin,0)}
-  ]);
-
-  $('sim-metrics').innerHTML = [
-    {label:'Bill 1 Margin',val:b1Margin.toFixed(1)+'%',cls:b1Margin>=-1?'good':'bad'},
-    {label:'Bill 2 Margin',val:b2Margin.toFixed(1)+'%',cls:b2Margin>=10?'good':b2Margin>=0?'warn':'bad'},
-    {label:'กำไร Bill 1',val:(b1Profit>=0?'+':'')+fmt(b1Profit),cls:b1Profit>=0?'good':'bad'},
-    {label:'กำไร Bill 2',val:(b2Profit>=0?'+':'')+fmt(b2Profit),cls:b2Profit>=0?'good':'warn'},
-    {label:'Net รวม',val:(netProfit>=0?'+':'')+fmt(netProfit),cls:netProfit>=0?'good':'bad'},
-    {label:'Net Margin',val:netPct.toFixed(1)+'%',cls:netPct>=target?'good':netPct>=0?'warn':'bad'},
-  ].map(m=>`<div class="metric ${m.cls}"><div class="metric-label">${m.label}</div><div class="metric-val">${m.val}</div></div>`).join('');
-
-  const gap = b2Margin/100 - target/100;
-  let convTable = '<table style="width:100%;font-size:12px;border-collapse:collapse">';
-  convTable += '<tr style="color:var(--text3)"><th style="text-align:left;padding:4px 8px">Conversion</th><th style="text-align:right;padding:4px 8px">Bill 2 ที่ทำได้</th><th style="text-align:right;padding:4px 8px">Net</th><th style="text-align:right;padding:4px 8px">Net %</th><th style="padding:4px 8px"></th></tr>';
-  [7,15,20,30,40,50].forEach(c => {
-    const ord = Math.round(leads*c/100);
-    const rev2 = ord*b2Aov;
-    const pr2 = rev2*b2Margin/100;
-    const net = b1Profit+pr2;
-    const np = (b1Rev+rev2)>0?net/(b1Rev+rev2)*100:0;
-    const ok = np>=target;
-    const cur = c==conv;
-    convTable += `<tr style="background:${cur?'var(--accent-light)':ok?'rgba(46,125,82,0.05)':'transparent'}">
+  const gap=b2m/100-target/100;
+  let tbl='<table style="width:100%;font-size:12px;border-collapse:collapse"><tr style="color:var(--text3)"><th style="text-align:left;padding:4px 8px">Conv%</th><th style="text-align:right;padding:4px 8px">Orders</th><th style="text-align:right;padding:4px 8px">Bill2 Rev</th><th style="text-align:right;padding:4px 8px">Net</th><th style="text-align:right;padding:4px 8px">Net%</th><th></th></tr>';
+  [5,7,10,15,20,30,40,50].forEach(c=>{
+    const ord=Math.round(leads*c/100);
+    const r2=ord*b2Aov;const p2=r2*b2m/100;
+    const n=b1p+p2;const np=(b1Rev+r2)>0?n/(b1Rev+r2)*100:0;
+    const ok=np>=target;const cur=c==conv;
+    tbl+=`<tr style="background:${cur?'var(--accent-light)':''}">
       <td style="padding:5px 8px;font-weight:${cur?600:400}">${c}%${cur?' ←':''}</td>
-      <td style="text-align:right;padding:5px 8px">${fmt(rev2)}</td>
-      <td style="text-align:right;padding:5px 8px;color:${net>=0?'var(--accent)':'var(--danger)'}">${net>=0?'+':''}${fmt(net)}</td>
+      <td style="text-align:right;padding:5px 8px">${ord}</td>
+      <td style="text-align:right;padding:5px 8px">${fmt(r2)}</td>
+      <td style="text-align:right;padding:5px 8px;color:${n>=0?'var(--accent)':'var(--danger)'}">${n>=0?'+':''}${fmt(n)}</td>
       <td style="text-align:right;padding:5px 8px;color:${ok?'var(--accent)':'var(--danger)'};font-weight:600">${np.toFixed(1)}%</td>
-      <td style="padding:5px 8px">${ok?'✓':''}</td>
+      <td style="padding:5px 8px">${ok?'✓':''}</td></tr>`;
+  });
+  $('sim-table').innerHTML=tbl+'</table>';
+
+  const vc2=gap>0?'good':net>=0?'warn':'bad';
+  const reqC=gap>0?((target/100*b1Rev-b1p)/(gap*b2Aov*leads/100)).toFixed(1):'—';
+  $('sim-verdict').innerHTML=`<div class="verdict ${vc2}"><div class="verdict-title">${netPct>=target?'✓ ถึง Target':net>=0?'ยังไม่ถึง Target':'ขาดทุนรวม'}</div><div class="verdict-body">Net ${netPct.toFixed(1)}% | Target ${target}% | Conversion ที่ต้องการ: ${reqC}%</div></div>`;
+}
+
+function mixRecalc(){
+  const fixed=gv('c_fixed');
+  const target=gv('c_target');
+  const blended=globalBlendedCM();
+  const gap=blended/100-target/100;
+  const be=gap>0?fixed/gap:null;
+  const beTarget=be?be*(1+target/100):null;
+  const actualRev=gv('mix_rev')*1000000;
+  const actualProfit=actualRev*blended/100-fixed;
+  const actualMargin=actualRev>0?actualProfit/actualRev*100:0;
+  const ch=channelSummary();
+
+  $('mix-metrics').innerHTML=[
+    {l:'Blended CM',v:blended.toFixed(1)+'%',c:blended>target?'good':blended>0?'warn':'bad'},
+    {l:'ยอด Breakeven',v:be?fmt(be)+' ฿':'∞',c:be&&be<15000000?'good':'warn'},
+    {l:'ยอดเพื่อ '+target+'%',v:beTarget?fmt(beTarget)+' ฿':'∞',c:beTarget&&beTarget<15000000?'good':'warn'},
+    {l:'Net (ยอดจริง)',v:(actualProfit>=0?'+':'')+fmt(actualProfit)+' ฿',c:actualProfit>=0?'good':'bad'},
+    {l:'Net Margin (จริง)',v:actualMargin.toFixed(1)+'%',c:actualMargin>=target?'good':actualMargin>=0?'warn':'bad'},
+    {l:'Gap to Target',v:be?fmt(Math.max(beTarget-actualRev,0))+' ฿':'—',c:beTarget&&actualRev>=beTarget?'good':'warn'},
+  ].map(m=>`<div class="metric ${m.c}"><div class="metric-label">${m.l}</div><div class="metric-val">${m.v}</div></div>`).join('');
+
+  // Product table
+  const totalShare=products.reduce((a,p)=>a+p.share,0);
+  let ptbl='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="color:var(--text3)"><th style="text-align:left;padding:6px 8px">สินค้า</th><th style="text-align:right;padding:6px 8px">Portfolio</th><th style="text-align:right;padding:6px 8px">CM Blended</th><th style="text-align:right;padding:6px 8px">CM (FB)</th><th style="text-align:right;padding:6px 8px">CM (CRM)</th><th style="text-align:right;padding:6px 8px">Weighted CM</th><th style="text-align:right;padding:6px 8px">Return</th></tr>';
+  products.forEach(p=>{
+    const cb=cmBlendedProduct(p);
+    const wt=totalShare>0?cb*(p.share/totalShare):0;
+    ptbl+=`<tr><td style="padding:6px 8px;font-weight:500">${p.name}</td>
+      <td style="text-align:right;padding:6px 8px">${p.share}%</td>
+      <td style="text-align:right;padding:6px 8px;color:${cb>=5?'var(--accent)':cb>=0?'var(--warn)':'var(--danger)'};font-weight:600">${cb.toFixed(1)}%</td>
+      <td style="text-align:right;padding:6px 8px;color:${cmFB(p)>=0?'var(--accent)':'var(--danger)'}">${cmFB(p).toFixed(1)}%</td>
+      <td style="text-align:right;padding:6px 8px;color:${cmCRM(p)>=0?'var(--accent)':'var(--danger)'}">${cmCRM(p).toFixed(1)}%</td>
+      <td style="text-align:right;padding:6px 8px;font-weight:600">${wt.toFixed(1)}%</td>
+      <td style="text-align:right;padding:6px 8px;color:${p.ret>3?'var(--danger)':p.ret>2?'var(--warn)':'var(--text2)'}">${p.ret}%</td>
     </tr>`;
   });
-  convTable += '</table>';
-  $('sim-conv-table').innerHTML = convTable;
+  ptbl+=`<tr style="border-top:2px solid var(--border);font-weight:600"><td colspan="5" style="padding:6px 8px">Weighted Blended CM</td><td style="text-align:right;padding:6px 8px;color:${blended>target?'var(--accent)':'var(--danger)'}">= ${blended.toFixed(1)}%</td><td></td></tr>`;
+  $('mix-product-table').innerHTML=ptbl+'</table>';
 
-  const vClass = netPct>=target?'good':netPct>=-2?'warn':'bad';
-  const reqConv = gap>0 ? ((target/100*b1Rev - b1Profit)/(gap*b2Aov*leads/100)).toFixed(1) : '—';
-  $('sim-verdict').innerHTML = `<div class="verdict ${vClass}">
-    <div class="verdict-title">${netPct>=target?'✓ ถึง Target แล้ว':netPct>=0?'ยังไม่ถึง Target':'ขาดทุนรวม'}</div>
-    <div class="verdict-body">Net ${netPct.toFixed(1)}% | ต้องการ ${target}% | ${gap>0?'Conversion ที่ต้องการ: '+reqConv+'%':'Bill 2 Margin ('+b2Margin.toFixed(1)+'%) ต้องสูงกว่า Target ('+target+'%)'}</div>
-  </div>`;
-}
-
-function mixSync() {
-  const fb = parseInt($('mix_fb').value);
-  let crm = parseInt($('mix_crm').value);
-  let line = parseInt($('mix_line').value);
-  const total = fb+crm+line;
-  $('mix_fb_v').textContent = fb+'%';
-  $('mix_crm_v').textContent = crm+'%';
-  $('mix_line_v').textContent = line+'%';
-  $('mix_sum_warn').textContent = total!==100 ? `⚠ รวม ${total}% (ต้องได้ 100%)` : '';
-}
-
-function mixRecalc() {
-  mixSync();
-  const fb = parseInt($('mix_fb').value)/100;
-  const crm = parseInt($('mix_crm').value)/100;
-  const line = parseInt($('mix_line').value)/100;
-  const lineCost = parseFloat($('mix_line_cost').value)||10;
-  const ads = parseFloat($('c_fb_ads').value)||45;
-  const fc = parseFloat($('c_crm_fixed_pct').value)||28.2;
-  const fixed = parseFloat($('c_fixed').value)||1200000;
-  const target = parseFloat($('c_target').value)||10;
-  const pid = parseInt($('mix_product').value);
-  const p = products.find(x=>x.id===pid)||products[0];
-  if(!p) return;
-  const vc = varCost(p);
-  const cmFb = (100-vc-ads)/100;
-  const cmCrm = (100-vc)/100;
-  const cmLine = (100-vc-lineCost)/100;
-  const blended = cmFb*fb + cmCrm*crm + cmLine*line;
-  const blendedPct = blended*100;
-
-  const gap = blended - target/100;
-  let reqRev = gap>0 ? fixed/gap : null;
-
-  $('mix-metrics').innerHTML = [
-    {label:'CM Facebook',val:(cmFb*100).toFixed(1)+'%',cls:cmFb>=0?'good':'bad'},
-    {label:'CM CRM',val:(cmCrm*100).toFixed(1)+'%',cls:cmCrm>=0.1?'good':'warn'},
-    {label:'CM Line',val:(cmLine*100).toFixed(1)+'%',cls:cmLine>=0.1?'good':'warn'},
-    {label:'Blended CM',val:blendedPct.toFixed(1)+'%',cls:blendedPct>target?'good':blendedPct>0?'warn':'bad'},
-    {label:'ยอด Breakeven',val:reqRev?fmt(reqRev):'∞',cls:reqRev&&reqRev<15000000?'good':'warn'},
-    {label:'Target Profit/เดือน',val:reqRev?fmt(reqRev*target/100):'—',cls:'info'},
-  ].map(m=>`<div class="metric ${m.cls}"><div class="metric-label">${m.label}</div><div class="metric-val">${m.val}</div></div>`).join('');
-
-  // Scenario table
-  let tbl = '<table style="width:100%;font-size:12px;border-collapse:collapse">';
-  tbl += '<tr style="color:var(--text3)"><th style="text-align:left;padding:4px 8px">สัดส่วน (FB:CRM:Line)</th><th style="text-align:right;padding:4px 8px">Blended CM</th><th style="text-align:right;padding:4px 8px">ยอด Breakeven</th><th style="text-align:right;padding:4px 8px">ยอด Target 10%</th></tr>';
-  [[50,50,0],[40,60,0],[30,70,0],[20,80,0],[30,60,10],[20,60,20]].forEach(([f,c,l]) => {
-    const cm = cmFb*(f/100)+cmCrm*(c/100)+cmLine*(l/100);
-    const g = cm - target/100;
-    const rv = g>0?fixed/g:null;
-    const cur = f==fb*100&&c==crm*100&&l==line*100;
-    tbl += `<tr style="background:${cur?'var(--accent-light)':'transparent'}">
-      <td style="padding:5px 8px;font-weight:${cur?600:400}">${f}:${c}:${l}${cur?' ←':''}</td>
-      <td style="text-align:right;padding:5px 8px;color:${cm*100>target?'var(--accent)':'var(--danger)'}">${(cm*100).toFixed(1)}%</td>
-      <td style="text-align:right;padding:5px 8px">${rv?fmt(rv)+'':'∞'}</td>
-      <td style="text-align:right;padding:5px 8px;font-weight:500">${rv?fmt(rv*(1+target/100)):'∞'}</td>
-    </tr>`;
+  // Channel summary table
+  let ctbl='<table style="width:100%;border-collapse:collapse;font-size:12px"><tr style="color:var(--text3)"><th style="text-align:left;padding:6px 8px">ช่องทาง</th><th style="text-align:right;padding:6px 8px">สัดส่วน (weighted)</th><th style="text-align:right;padding:6px 8px">ต้นทุนช่องทาง</th></tr>';
+  [{l:'Facebook',pct:ch.fb,cost:gv('c_fb_ads')},{l:'CRM/โทร',pct:ch.crm,cost:gv('c_crm_fc')},{l:'Line/Repeat',pct:ch.line,cost:gv('c_line_cost')}].forEach(c=>{
+    ctbl+=`<tr><td style="padding:6px 8px">${c.l}</td><td style="text-align:right;padding:6px 8px">${c.pct.toFixed(1)}%</td><td style="text-align:right;padding:6px 8px">${c.cost.toFixed(1)}%</td></tr>`;
   });
-  tbl += '</table>';
-  $('mix-table').innerHTML = tbl;
+  $('mix-channel-table').innerHTML=ctbl+'</table>';
 
-  const vClass = reqRev&&reqRev<15000000?'good':reqRev&&reqRev<25000000?'warn':'bad';
-  $('mix-verdict').innerHTML = `<div class="verdict ${vClass}" style="margin-top:1rem">
-    <div class="verdict-title">${!reqRev?'Blended CM ต่ำกว่า Target':reqRev<10000000?'ยอดที่ต้องทำอยู่ในเกณฑ์ที่ทำได้':reqRev<20000000?'ยอดค่อนข้างสูง ควรปรับ Channel Mix':'ต้องการยอดสูงมาก — ควรเพิ่มสัดส่วน CRM'}</div>
-    <div class="verdict-body">Blended CM ${blendedPct.toFixed(1)}% | ยอด Breakeven ${reqRev?fmt(reqRev)+' บาท':'ไม่มีคำตอบ'} | ถ้าต้องการกำไร 10% ต้องทำ ${reqRev?fmt(reqRev*1.1)+' บาท':'—'}/เดือน</div>
+  // Scenario
+  $('mix-scenario').innerHTML=`<div class="metric-grid">
+    <div class="metric ${actualProfit>=0?'good':'bad'}"><div class="metric-label">กำไรสุทธิ</div><div class="metric-val">${(actualProfit>=0?'+':'')+fmt(actualProfit)}</div><div class="metric-sub">จากยอด ${(gv('mix_rev')).toFixed(1)}M</div></div>
+    <div class="metric ${actualMargin>=target?'good':actualMargin>=0?'warn':'bad'}"><div class="metric-label">Net Margin จริง</div><div class="metric-val">${actualMargin.toFixed(1)}%</div><div class="metric-sub">Target ${target}%</div></div>
+    <div class="metric info"><div class="metric-label">ต้องเพิ่มยอดอีก</div><div class="metric-val">${beTarget&&actualRev<beTarget?fmt(beTarget-actualRev):'ถึงแล้ว ✓'}</div><div class="metric-sub">เพื่อ Net ${target}%</div></div>
   </div>`;
 
-  updateSummaryBar(blendedPct, reqRev, fixed, target);
+  const vClass=blended>target?'good':blended>0?'warn':'bad';
+  $('mix-verdict').innerHTML=`<div class="verdict ${vClass}"><div class="verdict-title">${blended>target?'✓ Blended CM สูงกว่า Target':blended>0?'⚠ ต้องเพิ่มสัดส่วน CRM หรือ Line':'✗ ขาดทุนรวม'}</div><div class="verdict-body">Blended CM ${blended.toFixed(1)}% | Target ${target}% | ยอด Breakeven ${be?fmt(be)+' บาท':'ไม่มี'} | ยอดที่ต้องทำ ${beTarget?fmt(beTarget)+' บาท/เดือน':'—'}</div></div>`;
+
+  updateSummaryBar(blended,be,beTarget,actualProfit,actualRev,target);
 }
 
-function updateSummaryBar(blendedCM, reqRev, fixed, target) {
-  $('sb_rev').textContent = reqRev ? fmt(reqRev*(1+target/100)) : '—';
-  $('sb_cm').textContent = blendedCM.toFixed(1)+'%';
-  $('sb_cm').className = 's-val '+(blendedCM>target?'good':blendedCM>0?'warn':'bad');
-  const profit = reqRev ? reqRev*(1+target/100)*target/100 : 0;
-  $('sb_profit').textContent = reqRev ? '+'+fmt(profit) : '—';
-  $('sb_profit').className = 's-val '+(profit>0?'good':'bad');
-  $('sb_margin').textContent = target+'%';
-  $('sb_margin').className = 's-val good';
-  $('sb_be').textContent = reqRev ? fmt(reqRev) : '—';
-  $('sb_be').className = 's-val '+(reqRev&&reqRev<15000000?'good':'warn');
+function updateSummaryBar(cm,be,beT,profit,rev,target){
+  $('sb_cm').textContent=cm.toFixed(1)+'%';
+  $('sb_cm').className='s-val '+(cm>target?'good':cm>0?'warn':'bad');
+  $('sb_be').textContent=be?fmt(be):'∞';
+  $('sb_be').className='s-val '+(be&&be<15000000?'good':'warn');
+  $('sb_target_rev').textContent=beT?fmt(beT):'∞';
+  $('sb_target_rev').className='s-val '+(beT&&rev>=beT?'good':'warn');
+  const margin=rev>0?profit/rev*100:0;
+  $('sb_net').textContent=(profit>=0?'+':'')+fmt(profit);
+  $('sb_net').className='s-val '+(profit>=0?'good':'bad');
+  $('sb_margin').textContent=margin.toFixed(1)+'%';
+  $('sb_margin').className='s-val '+(margin>=target?'good':margin>=0?'warn':'bad');
 }
 
-function recalc() {
+function renderDashboard(){
+  const fixed=gv('c_fixed');
+  const target=gv('c_target');
+  const blended=globalBlendedCM();
+  const gap=blended/100-target/100;
+  const be=gap>0?fixed/gap:null;
+  const beT=be?be*(1+target/100):null;
+  const ch=channelSummary();
+
+  $('dash-metrics').innerHTML=[
+    {l:'Fixed Cost/เดือน',v:fmt(fixed)+' ฿',c:'info'},
+    {l:'Blended CM',v:blended.toFixed(1)+'%',c:blended>target?'good':'warn'},
+    {l:'ยอด Breakeven',v:be?fmt(be)+' ฿':'∞',c:be&&be<15000000?'good':'warn'},
+    {l:'ยอดเพื่อ '+target+'%',v:beT?fmt(beT)+' ฿':'∞',c:beT&&beT<15000000?'good':'warn'},
+  ].map(m=>`<div class="metric ${m.c}"><div class="metric-label">${m.l}</div><div class="metric-val">${m.v}</div></div>`).join('');
+
+  // Waterfall ใช้ค่า weighted
+  const avgVC=products.reduce((a,p)=>{const ts=products.reduce((x,q)=>x+q.share,0);return a+vc(p)*(p.share/(ts||1));},0);
+  $('dash-waterfall').innerHTML=[
+    {l:'ยอดขาย',v:100,col:'#2D6A4F'},{l:'ต้นทุนรวม',v:avgVC,col:'#E57373'},
+    {l:'ค่าช่องทาง (weighted)',v:100-blended-avgVC,col:'#F5A623'},
+    {l:'Fixed Cost',v:0,col:'#7986CB'},
+    {l:'Blended CM',v:Math.max(blended,0),col:'#43A047'},
+  ].map(w=>`<div class="wf-row"><div class="wf-label">${w.l}</div><div class="wf-bar-wrap"><div class="wf-bar" style="width:${Math.min(w.v,100)}%;background:${w.col}"></div></div><div class="wf-pct">${w.v.toFixed(1)}%</div></div>`).join('');
+
+  $('dash-channels').innerHTML=`<table class="ch-table">
+    <thead><tr><th>ช่องทาง</th><th style="text-align:right">สัดส่วน</th><th style="text-align:right">ต้นทุนช่องทาง</th></tr></thead>
+    <tbody>
+      ${[['Facebook',ch.fb,gv('c_fb_ads')],['CRM/โทร',ch.crm,gv('c_crm_fc')],['Line/Repeat',ch.line,gv('c_line_cost')]].map(([l,p,c])=>`<tr><td>${l}</td><td style="text-align:right">${p.toFixed(1)}%</td><td style="text-align:right">${c.toFixed(1)}%</td></tr>`).join('')}
+    </tbody>
+  </table>`;
+
+  const totalShare=products.reduce((a,p)=>a+p.share,0);
+  $('dash-products').innerHTML=`<table class="ch-table">
+    <thead><tr><th>สินค้า</th><th style="text-align:right">Portfolio</th><th style="text-align:right">AOV</th><th style="text-align:right">CM Blended</th><th style="text-align:right">สถานะ</th></tr></thead>
+    <tbody>${products.map(p=>{const cb=cmBlendedProduct(p);return `<tr><td>${p.name}</td><td style="text-align:right">${p.share}%</td><td style="text-align:right">${fmt(p.aov)} ฿</td><td style="text-align:right;color:${cb>=5?'var(--accent)':cb>=0?'var(--warn)':'var(--danger)'};font-weight:600">${cb.toFixed(1)}%</td><td style="text-align:right">${statusBadge(cb)}</td></tr>`;}).join('')}</tbody>
+  </table>`;
+
+  const vc2=blended>target?'good':blended>0?'warn':'bad';
+  $('dash-verdict').innerHTML=`<div class="verdict ${vc2}"><div class="verdict-title">${blended>target?'✓ โครงสร้างปัจจุบันสามารถทำกำไรได้':blended>0?'⚠ Blended CM ต่ำกว่า Target':'✗ ขาดทุน — ต้องปรับโครงสร้างด่วน'}</div><div class="verdict-body">Blended CM ${blended.toFixed(1)}% | Target ${target}% | ยอดที่ต้องทำ ${beT?fmt(beT)+' บาท/เดือน':'—'}</div></div>`;
+}
+
+function recalc(){
   renderProducts();
   simRecalc();
   mixRecalc();
   renderDashboard();
 }
 
-function renderDashboard() {
-  const fixed = parseFloat($('c_fixed').value)||1200000;
-  const target = parseFloat($('c_target').value)||10;
-  const fb = parseInt($('mix_fb').value)/100;
-  const crm = parseInt($('mix_crm').value)/100;
-  const line = parseInt($('mix_line').value)/100;
-  const ads = parseFloat($('c_fb_ads').value)||45;
-  const fc = parseFloat($('c_crm_fixed_pct').value)||28.2;
-  const lineCost = parseFloat($('mix_line_cost').value)||10;
-  const pid = parseInt($('mix_product').value);
-  const p = products.find(x=>x.id===pid)||products[0];
-  if(!p) return;
-  const vc = varCost(p);
-  const cmFb = (100-vc-ads)/100;
-  const cmCrm = (100-vc)/100;
-  const cmLine = (100-vc-lineCost)/100;
-  const blended = cmFb*fb + cmCrm*crm + cmLine*line;
-  const gap = blended - target/100;
-  const reqRev = gap>0?fixed/gap:null;
-  const reqRevTarget = reqRev?reqRev*(1+target/100):null;
-
-  $('dash-metrics').innerHTML = [
-    {label:'Fixed Cost/เดือน',val:fmt(fixed)+' ฿',cls:'info'},
-    {label:'Blended CM',val:(blended*100).toFixed(1)+'%',cls:blended*100>target?'good':'warn'},
-    {label:'ยอด Breakeven',val:reqRev?fmt(reqRev)+' ฿':'∞',cls:reqRev&&reqRev<15000000?'good':'warn'},
-    {label:'ยอดเพื่อกำไร '+target+'%',val:reqRevTarget?fmt(reqRevTarget)+' ฿':'∞',cls:reqRevTarget&&reqRevTarget<15000000?'good':'warn'},
-  ].map(m=>`<div class="metric ${m.cls}"><div class="metric-label">${m.label}</div><div class="metric-val">${m.val}</div></div>`).join('');
-
-  const wfItems = [
-    {label:'ยอดขาย',val:100,color:'#2D6A4F'},
-    {label:'ต้นทุนสินค้า',val:p.cogs,color:'#E57373'},
-    {label:'VAT',val:p.vat,color:'#F5A623'},
-    {label:'Shipping',val:p.ship,color:'#7986CB'},
-    {label:'Coupon',val:p.coupon,color:'#9575CD'},
-    {label:'ค่าแอด/Fixed',val:(vc+ads*fb*100+fc*crm*100+lineCost*line*100)/100,color:'#EF5350'},
-    {label:'กำไรสุทธิ',val:Math.max(blended*100-target,0),color:'#43A047'},
-  ];
-  $('dash-waterfall').innerHTML = wfItems.map(w => `
-    <div class="wf-row">
-      <div class="wf-label">${w.label}</div>
-      <div class="wf-bar-wrap"><div class="wf-bar" style="width:${Math.min(w.val,100)}%;background:${w.color}"></div></div>
-      <div class="wf-pct">${w.val.toFixed(1)}%</div>
-    </div>`).join('');
-
-  $('dash-channels').innerHTML = [
-    {ch:'Facebook',pct:fb*100,cm:cmFb*100,cost:vc+ads},
-    {ch:'CRM/โทร',pct:crm*100,cm:cmCrm*100-fc,cost:vc+fc},
-    {ch:'Line/Repeat',pct:line*100,cm:cmLine*100,cost:vc+lineCost},
-  ].map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
-    <span style="font-weight:500">${c.ch}</span>
-    <span style="color:var(--text2)">${c.pct.toFixed(0)}% ของยอด</span>
-    <span style="color:${c.cm>=10?'var(--accent)':c.cm>=0?'var(--warn)':'var(--danger)'};font-weight:600">${c.cm.toFixed(1)}% CM</span>
-  </div>`).join('');
-
-  const vClass = blended*100>target?'good':blended*100>0?'warn':'bad';
-  $('dash-verdict').innerHTML = `<div class="verdict ${vClass}">
-    <div class="verdict-title">${blended*100>target?'✓ Channel Mix ปัจจุบันสามารถทำกำไรได้':blended*100>0?'⚠ Blended CM ต่ำกว่า Target — ต้องเพิ่มสัดส่วน CRM หรือ Line':'✗ ขาดทุนรวม — ต้องปรับโครงสร้างต้นทุนด่วน'}</div>
-    <div class="verdict-body">Blended CM ${(blended*100).toFixed(1)}% | Target ${target}% | ยอดที่ต้องทำ ${reqRevTarget?fmt(reqRevTarget)+' บาท/เดือน':'ไม่สามารถทำได้ที่ CM นี้'}</div>
-  </div>`;
-}
-
-// Init
 recalc();
-mixSync();
+sv('mix_rev','mix_rev_v','M');
 </script>
 </body>
 </html>
