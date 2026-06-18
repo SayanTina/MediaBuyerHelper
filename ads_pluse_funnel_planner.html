@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AdPulse — Funnel Planner</title>
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #18181c;
+    --surface2: #222228;
+    --border: #2e2e38;
+    --border2: #3a3a48;
+    --text: #e8e8f0;
+    --text2: #9898b0;
+    --text3: #5a5a70;
+    --purple: #7c6ff7;
+    --purple-dim: #3d3880;
+    --purple-bg: #1a1830;
+    --teal: #34d4a0;
+    --teal-dim: #1a6850;
+    --teal-bg: #0d2820;
+    --amber: #f5c842;
+    --amber-dim: #7a6010;
+    --amber-bg: #221a04;
+    --red: #f04f4f;
+    --red-bg: #2a0f0f;
+    --green: #48e088;
+    --green-bg: #0a2018;
+    --accent: #7c6ff7;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, sans-serif; font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(15,15,17,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 24px; display: flex; align-items: center; gap: 0; height: 52px; }
+  .nav-brand { font-size: 13px; font-weight: 700; letter-spacing: 0.12em; color: var(--purple); margin-right: 28px; text-transform: uppercase; }
+  .nav-tabs { display: flex; gap: 2px; flex: 1; overflow-x: auto; }
+  .nav-tab { padding: 6px 14px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 500; color: var(--text2); cursor: pointer; white-space: nowrap; border: none; background: none; transition: all 0.15s; }
+  .nav-tab:hover { color: var(--text); background: var(--surface2); }
+  .nav-tab.active { color: var(--purple); background: var(--purple-bg); }
+
+  /* LAYOUT */
+  .container { max-width: 960px; margin: 0 auto; padding: 32px 24px 80px; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; }
+  .card-title { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 14px; }
+  .card-accent { border-left: 3px solid var(--purple); }
+
+  /* SECTION HEADERS */
+  .section-header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .section-title { font-size: 18px; font-weight: 700; color: var(--text); }
+  .section-sub { font-size: 12px; color: var(--text3); }
+
+  /* FORM CONTROLS */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 6px; letter-spacing: 0.05em; }
+  .field input, .field select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 8px 12px; font-size: 13px; outline: none; transition: border 0.15s; font-family: inherit; }
+  .field input:focus, .field select:focus { border-color: var(--purple); }
+  .field select option { background: var(--surface2); }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .field-hint { font-size: 11px; color: var(--text3); margin-top: 4px; }
+
+  /* METRICS GRID */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .metric { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+  .metric-val { font-size: 22px; font-weight: 700; color: var(--text); }
+  .metric-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .metric-sub { font-size: 11px; color: var(--text2); margin-top: 4px; }
+  .metric.purple { border-color: var(--purple-dim); background: var(--purple-bg); }
+  .metric.purple .metric-val { color: var(--purple); }
+  .metric.teal { border-color: var(--teal-dim); background: var(--teal-bg); }
+  .metric.teal .metric-val { color: var(--teal); }
+
+  /* TABLE */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; padding: 8px 12px; color: var(--text3); font-weight: 600; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; letter-spacing: 0.04em; }
+  .tag-purple { background: var(--purple-bg); color: var(--purple); border: 1px solid var(--purple-dim); }
+  .tag-teal { background: var(--teal-bg); color: var(--teal); border: 1px solid var(--teal-dim); }
+  .tag-amber { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-dim); }
+  .tag-red { background: var(--red-bg); color: var(--red); }
+  .tag-green { background: var(--green-bg); color: var(--green); }
+
+  /* ALERT */
+  .alert { border-radius: var(--radius-sm); padding: 12px 16px; font-size: 12px; margin-bottom: 12px; line-height: 1.5; }
+  .alert strong { display: block; margin-bottom: 2px; font-size: 11px; letter-spacing: 0.04em; }
+  .alert-warn { background: var(--amber-bg); border: 1px solid var(--amber-dim); color: #c8a030; }
+  .alert-warn strong { color: var(--amber); }
+  .alert-info { background: var(--purple-bg); border: 1px solid var(--purple-dim); color: #a098e0; }
+  .alert-info strong { color: var(--purple); }
+  .alert-ok { background: var(--green-bg); border: 1px solid var(--teal-dim); color: #40b878; }
+  .alert-ok strong { color: var(--green); }
+  .alert-red { background: var(--red-bg); border: 1px solid #5a2020; color: #c06060; }
+  .alert-red strong { color: var(--red); }
+
+  /* BUTTONS */
+  .btn { padding: 8px 18px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; font-family: inherit; }
+  .btn-primary { background: var(--purple); color: #fff; }
+  .btn-primary:hover { background: #9088ff; }
+  .btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: var(--border2); }
+  .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #5a2020; }
+  .btn-danger:hover { background: #3a1010; }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+
+  /* BADGE STATUS */
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .dot-green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .dot-amber { background: var(--amber); }
+  .dot-red { background: var(--red); }
+  .dot-gray { background: var(--text3); }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; }
+  .checklist li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .checklist li:last-child { border-bottom: none; }
+  .checklist input[type=checkbox] { margin-top: 2px; accent-color: var(--purple); width: 15px; height: 15px; flex-shrink: 0; cursor: pointer; }
+  .checklist .check-label { flex: 1; }
+  .checklist .check-label.done { color: var(--text3); text-decoration: line-through; }
+  .checklist .check-meta { font-size: 11px; color: var(--text3); display: block; margin-top: 2px; }
+  .check-group { margin-bottom: 6px; }
+  .check-group-title { font-size: 11px; font-weight: 700; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 0 4px; }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 1px; background: var(--border2); }
+  .tl-item { position: relative; margin-bottom: 20px; }
+  .tl-dot { position: absolute; left: -24px; top: 4px; width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--surface); }
+  .tl-dot.purple { background: var(--purple); box-shadow: 0 0 8px var(--purple); }
+  .tl-dot.teal { background: var(--teal); }
+  .tl-dot.amber { background: var(--amber); }
+  .tl-date { font-size: 10px; font-weight: 700; color: var(--text3); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; }
+  .tl-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .tl-body { font-size: 12px; color: var(--text2); }
+  .tl-kpi { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .kpi-pill { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 3px 8px; font-size: 11px; color: var(--text2); }
+
+  /* PROGRESS BAR */
+  .pool-bar { margin: 4px 0; }
+  .pool-bar-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+  .pool-bar-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .pool-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s; }
+
+  /* CONTENT CARDS */
+  .content-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+  .content-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .content-card.new-content { border-style: dashed; border-color: var(--border2); background: var(--surface); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text3); min-height: 120px; transition: all 0.15s; }
+  .content-card.new-content:hover { border-color: var(--purple); color: var(--purple); background: var(--purple-bg); }
+  .content-card-type { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+  .content-card-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .content-card-status { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 6px; }
+  .content-card-actions { display: flex; gap: 6px; margin-top: 10px; }
+
+  /* NAMING PREVIEW */
+  .naming-example { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-family: 'Courier New', monospace; font-size: 11px; color: var(--teal); margin-top: 6px; word-break: break-all; }
+  .naming-row { margin-bottom: 10px; }
+  .naming-row-label { font-size: 11px; color: var(--text3); margin-bottom: 3px; }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: center; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius); padding: 24px; width: 480px; max-width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .modal-title { font-size: 15px; font-weight: 700; margin-bottom: 16px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+
+  /* MISC */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+  .flex { display: flex; align-items: center; gap: 8px; }
+  .flex-between { display: flex; align-items: center; justify-content: space-between; }
+  .text-purple { color: var(--purple); }
+  .text-teal { color: var(--teal); }
+  .text-amber { color: var(--amber); }
+  .text-red { color: var(--red); }
+  .text-sm { font-size: 12px; }
+  .text-xs { font-size: 11px; color: var(--text3); }
+  .mb-8 { margin-bottom: 8px; }
+  .mb-16 { margin-bottom: 16px; }
+  .mt-8 { margin-top: 8px; }
+  .fw-600 { font-weight: 600; }
+  .w-full { width: 100%; }
+
+  @media (max-width: 600px) {
+    .metrics { grid-template-columns: 1fr 1fr; }
+    .content-grid { grid-template-columns: 1fr; }
+    .field-row, .field-row3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-brand">AdPulse</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('setup')">⚙ Setup</button>
+    <button class="nav-tab" onclick="showPage('budget')">฿ งบประมาณ</button>
+    <button class="nav-tab" onclick="showPage('campaigns')">📋 Campaigns</button>
+    <button class="nav-tab" onclick="showPage('audience')">👥 Audiences</button>
+    <button class="nav-tab" onclick="showPage('pool')">📊 Pool Monitor</button>
+    <button class="nav-tab" onclick="showPage('naming')">🏷 Naming</button>
+    <button class="nav-tab" onclick="showPage('checklist')">✅ Checklist</button>
+    <button class="nav-tab" onclick="showPage('scale')">⚡ Scale Rules</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════════ SETUP ═══ -->
+<div class="container">
+<div id="page-setup" class="page active">
+  <div class="section-header">
+    <span class="section-title">ตั้งค่าแคมเปญ</span>
+    <span class="section-sub">กำหนดค่าพื้นฐานสำหรับสินค้าและ Funnel ที่จะรัน</span>
+  </div>
+
+  <div class="card card-accent">
+    <div class="card-title">ข้อมูลสินค้าและธุรกิจ</div>
+    <div class="field-row">
+      <div class="field">
+        <label>ชื่อแบรนด์ / สินค้า</label>
+        <input type="text" id="brandName" value="Yanhee" oninput="updateAll()">
+      </div>
+      <div class="field">
+        <label>ช่องทางปิดการขายหลัก</label>
+        <select id="salesChannel" onchange="updateAll()">
+          <option value="chat">Chat (Messenger / LINE)</option>
+          <option value="website">Website / Checkout</option>
+          <option value="both">ทั้ง Chat และ Website</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row3">
+      <div class="field">
+        <label>ราคา SKU ต่ำสุด (฿)</label>
+        <input type="number" id="priceLow" value="990" oninput="updateAll()">
+      </div>
+      <div class="field">
+        <label>ราคา SKU กลาง (฿)</label>
+        <input type="number" id="priceMid" value="1290" oninput="updateAll()">
+      </div>
+      <div class="field">
+        <label>ราคา SKU สูงสุด (฿)</label>
+        <input type="number" id="priceHigh" value="1690" oninput="updateAll()">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>% Marketing Cost (ของราคาขาย)</label>
+        <input type="number" id="marketingPct" value="30" min="1" max="100" oninput="updateAll()">
+        <div class="field-hint">CPA สูงสุดที่รับได้ = ราคาขาย × %นี้</div>
+      </div>
+      <div class="field">
+        <label>Chat-to-Sale Rate (%)</label>
+        <input type="number" id="chatSaleRate" value="40" min="1" max="100" oninput="updateAll()">
+        <div class="field-hint">จาก 100 Chat ปิดได้กี่ราย</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">งบประมาณและโครงสร้าง Funnel</div>
+    <div class="field-row">
+      <div class="field">
+        <label>งบรวมต่อวัน (฿)</label>
+        <input type="number" id="totalBudget" value="1500" oninput="updateAll()">
+      </div>
+      <div class="field">
+        <label>% Mid Funnel (Phase 1)</label>
+        <input type="number" id="mfPct" value="70" min="40" max="90" oninput="updateAll()">
+        <div class="field-hint">Phase 2 (Retarget) จะได้ที่เหลืออัตโนมัติ</div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>CPM เป้าหมาย Retarget (฿)</label>
+        <input type="number" id="targetCPM" value="100" oninput="updateAll()">
+        <div class="field-hint">ใช้คำนวณ Pool ขั้นต่ำ — ปกติ ฿80–130 สำหรับไทย</div>
+      </div>
+      <div class="field">
+        <label>Frequency Cap (ครั้ง / 7 วัน)</label>
+        <input type="number" id="freqCap" value="3" min="1" max="7" oninput="updateAll()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary output -->
+  <div id="setupSummary"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ BUDGET ═══ -->
+<div id="page-budget" class="page">
+  <div class="section-header">
+    <span class="section-title">งบประมาณ & Target CPA</span>
+    <span class="section-sub">คำนวณอัตโนมัติจากค่าที่ตั้งในหน้า Setup</span>
+  </div>
+  <div id="budgetMetrics" class="metrics"></div>
+  <div class="card">
+    <div class="card-title">การกระจายงบต่อ Campaign</div>
+    <div class="table-wrap"><table id="budgetTable"></table></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Target CPA ต่อ SKU</div>
+    <div class="table-wrap"><table id="cpaTable"></table></div>
+  </div>
+  <div id="budgetAlerts"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ CAMPAIGNS ═══ -->
+<div id="page-campaigns" class="page">
+  <div class="section-header">
+    <span class="section-title">Content & Campaigns</span>
+    <span class="section-sub">จัดการ Content ที่รันอยู่และดู Campaign Structure</span>
+  </div>
+
+  <div id="contentGrid" class="content-grid"></div>
+
+  <div class="card">
+    <div class="card-title">Campaign Structure ปัจจุบัน</div>
+    <div class="table-wrap"><table id="campaignTable"></table></div>
+  </div>
+
+  <div id="contentLimitAlert"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════ AUDIENCES ═══ -->
+<div id="page-audience" class="page">
+  <div class="section-header">
+    <span class="section-title">Custom Audience Plan</span>
+    <span class="section-sub">CA ทั้งหมดที่ต้องสร้าง — สร้างวันแรกที่ Ad รันเสมอ</span>
+  </div>
+  <div id="audienceSummary" class="metrics"></div>
+  <div class="card">
+    <div class="card-title">Core Custom Audiences</div>
+    <div class="table-wrap"><table id="audienceTable"></table></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Exclusion Audiences (สำคัญ — ห้ามลืม)</div>
+    <div class="table-wrap"><table id="exclusionTable"></table></div>
+  </div>
+  <div class="alert alert-warn">
+    <strong>⚠ สร้าง CA ทั้งหมดวันแรกก่อน Launch Ad</strong>
+    Facebook ไม่ย้อน Populate Audience ให้ — ถ้าสร้าง CA หลัง Ad รันไปแล้ว Pool ที่สะสมก่อนหน้าจะหายไปทั้งหมด
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ POOL MONITOR ═══ -->
+<div id="page-pool" class="page">
+  <div class="section-header">
+    <span class="section-title">Pool Size Monitor</span>
+    <span class="section-sub">ตรวจสอบว่า CA แต่ละตัวพร้อมเปิด Retarget หรือยัง</span>
+  </div>
+
+  <div class="alert alert-info mb-16">
+    <strong>วิธีใช้</strong>กรอก Pool Size จริงที่เห็นใน Facebook Audience Manager เพื่อตรวจสอบว่า Retarget พร้อม Launch ได้หรือยัง
+  </div>
+
+  <div id="poolMonitor"></div>
+
+  <div class="card mt-8">
+    <div class="card-title">Pool Minimum Calculator</div>
+    <p class="text-sm" style="color:var(--text2);margin-bottom:12px">ขนาด Pool ขั้นต่ำที่คำนวณได้จากงบและ Frequency Cap ที่ตั้งไว้</p>
+    <div id="poolCalc"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ NAMING ═══ -->
+<div id="page-naming" class="page">
+  <div class="section-header">
+    <span class="section-title">Naming Convention</span>
+    <span class="section-sub">มาตรฐานชื่อทุกระดับ — ห้ามมีช่องว่าง ใช้ _ คั่นเสมอ</span>
+  </div>
+  <div id="namingExamples"></div>
+  <div class="card">
+    <div class="card-title">ทดสอบสร้างชื่อ</div>
+    <div class="field-row">
+      <div class="field">
+        <label>ประเภท Content</label>
+        <select id="namingContent" onchange="updateNaming()">
+          <option>Review</option><option>Trust</option><option>Problem</option><option>NewContent</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Version</label>
+        <input type="text" id="namingVersion" value="v1" oninput="updateNaming()">
+      </div>
+    </div>
+    <div id="namingOutput"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ CHECKLIST ═══ -->
+<div id="page-checklist" class="page">
+  <div class="section-header">
+    <span class="section-title">Launch Checklist</span>
+    <span class="section-sub">ทำครบทุกข้อก่อน Launch — กดติ๊กเมื่อทำเสร็จ</span>
+  </div>
+
+  <div class="flex-between mb-8">
+    <div id="checkProgress" class="text-sm" style="color:var(--text2)"></div>
+    <button class="btn btn-ghost btn-sm" onclick="resetChecklist()">Reset ทั้งหมด</button>
+  </div>
+
+  <div class="card" id="checklistCard">
+    <div class="check-group">
+      <div class="check-group-title">📅 วันที่ 1 — Setup Day (ก่อน Launch)</div>
+      <ul class="checklist" id="checklist-day1"></ul>
+    </div>
+    <div class="divider"></div>
+    <div class="check-group">
+      <div class="check-group-title">🚀 Launch Day — MF Campaign</div>
+      <ul class="checklist" id="checklist-launch"></ul>
+    </div>
+    <div class="divider"></div>
+    <div class="check-group">
+      <div class="check-group-title">📈 สัปดาห์ 3 — เปิด Retarget Tier A</div>
+      <ul class="checklist" id="checklist-retarget"></ul>
+    </div>
+    <div class="divider"></div>
+    <div class="check-group">
+      <div class="check-group-title">🔄 ทุกสัปดาห์ — Monitoring</div>
+      <ul class="checklist" id="checklist-weekly"></ul>
+    </div>
+    <div class="divider"></div>
+    <div class="check-group">
+      <div class="check-group-title">➕ เพิ่ม Content ใหม่</div>
+      <ul class="checklist" id="checklist-newcontent"></ul>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════ SCALE ═══ -->
+<div id="page-scale" class="page">
+  <div class="section-header">
+    <span class="section-title">Scale / Pause Framework</span>
+    <span class="section-sub">เกณฑ์ตัดสินใจทุกสถานการณ์ — อิงจากตัวเลขเท่านั้น</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">ตรวจสอบสถานะ Ad Set</div>
+    <p class="text-sm mb-16" style="color:var(--text2)">กรอกตัวเลขจริงจาก Ads Manager เพื่อให้ระบบแนะนำ Action</p>
+    <div class="field-row3">
+      <div class="field">
+        <label>CPA จริง (฿)</label>
+        <input type="number" id="checkCPA" placeholder="เช่น 280" oninput="checkScale()">
+      </div>
+      <div class="field">
+        <label>CTR (%)</label>
+        <input type="number" id="checkCTR" placeholder="เช่น 1.8" step="0.1" oninput="checkScale()">
+      </div>
+      <div class="field">
+        <label>Frequency</label>
+        <input type="number" id="checkFreq" placeholder="เช่น 2.4" step="0.1" oninput="checkScale()">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field">
+        <label>ThruPlay Rate (%)</label>
+        <input type="number" id="checkThruPlay" placeholder="เช่น 22" step="0.1" oninput="checkScale()">
+      </div>
+      <div class="field">
+        <label>SKU ที่วัด</label>
+        <select id="checkSKU" onchange="checkScale()">
+          <option value="low">SKU ต่ำสุด</option>
+          <option value="mid" selected>SKU กลาง</option>
+          <option value="high">SKU สูงสุด</option>
+        </select>
+      </div>
+    </div>
+    <div id="scaleResult"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">กฎ Scale / Pause ทั้งหมด</div>
+    <div id="scaleRules"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Timeline วัดผล 3 เดือนแรก</div>
+    <div class="timeline" id="timeline"></div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- ADD CONTENT MODAL -->
+<div class="modal-overlay" id="addContentModal">
+  <div class="modal">
+    <div class="modal-title">➕ เพิ่ม Content ใหม่</div>
+    <div class="field">
+      <label>ประเภท Content</label>
+      <select id="newContentType">
+        <option>Review</option><option>Trust</option><option>Problem</option>
+        <option>Comparison</option><option>FAQ</option><option>Testimonial</option><option>Other</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>ชื่อ Content (ภาษาอังกฤษ ไม่มีช่องว่าง)</label>
+      <input type="text" id="newContentName" placeholder="เช่น Review2, BeforeAfter" oninput="previewNewContent()">
+    </div>
+    <div id="newContentPreview"></div>
+    <div class="alert alert-warn mt-8">
+      <strong>ต้องทำหลังเพิ่ม Content</strong>
+      สร้าง CA 3 ตัวใหม่ + Update EXCL_AllHot + สร้าง RT Campaign ใหม่ 1 Campaign
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="addContent()">เพิ่ม Content</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let contents = [
+  { id: 1, type: 'Review', name: 'Review', active: true, poolHot: 0, poolWarm: 0, poolEngaged: 0 },
+  { id: 2, type: 'Trust', name: 'Trust', active: true, poolHot: 0, poolWarm: 0, poolEngaged: 0 },
+  { id: 3, type: 'Problem', name: 'Problem', active: true, poolHot: 0, poolWarm: 0, poolEngaged: 0 },
+];
+let nextId = 4;
+let checkStates = {};
+
+// ═══════════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════════
+const g = id => document.getElementById(id);
+const v = id => parseFloat(g(id)?.value) || 0;
+const s = id => g(id)?.value || '';
+const fmt = n => '฿' + Math.round(n).toLocaleString();
+const fmtN = n => Math.round(n).toLocaleString();
+
+function getConfig() {
+  return {
+    brand: s('brandName') || 'Yanhee',
+    channel: s('salesChannel'),
+    priceLow: v('priceLow'),
+    priceMid: v('priceMid'),
+    priceHigh: v('priceHigh'),
+    mktPct: v('marketingPct') / 100,
+    chatRate: v('chatSaleRate') / 100,
+    totalBudget: v('totalBudget'),
+    mfPct: v('mfPct') / 100,
+    targetCPM: v('targetCPM'),
+    freqCap: v('freqCap'),
+  };
+}
+
+function getMaxCPA(price, cfg) { return price * cfg.mktPct; }
+function getTargetCPA(price, cfg) { return getMaxCPA(price, cfg) * 0.8; }
+function getCostPerChat(price, cfg) { return getMaxCPA(price, cfg) * cfg.chatRate; }
+
+function minPool(budgetPerDay, cfg) {
+  return Math.ceil((budgetPerDay / cfg.targetCPM) * 1000 * cfg.freqCap);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  g('page-' + id).classList.add('active');
+  event.target.classList.add('active');
+  updateAll();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UPDATE ALL
+// ═══════════════════════════════════════════════════════════════
+function updateAll() {
+  renderSetupSummary();
+  renderBudget();
+  renderCampaigns();
+  renderAudiences();
+  renderPoolMonitor();
+  renderNaming();
+  renderChecklist();
+  renderScale();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SETUP SUMMARY
+// ═══════════════════════════════════════════════════════════════
+function renderSetupSummary() {
+  const cfg = getConfig();
+  const mfBudget = cfg.totalBudget * cfg.mfPct;
+  const rtBudget = cfg.totalBudget * (1 - cfg.mfPct);
+  const rtPerContent = contents.length > 0 ? rtBudget / contents.length : 0;
+
+  const warn = rtPerContent < 150 ? `<div class="alert alert-warn mt-8"><strong>⚠ งบ Retarget ต่อ Campaign (${fmt(rtPerContent)}/วัน) ต่ำกว่า ฿150</strong>อาจเข้า Learning Limited — พิจารณาเพิ่มงบรวมหรือลด Content ที่รันพร้อมกัน</div>` : '';
+  g('setupSummary').innerHTML = `
+    <div class="metrics">
+      <div class="metric purple"><div class="metric-val">${fmt(mfBudget)}</div><div class="metric-label">Mid Funnel / วัน</div><div class="metric-sub">${Math.round(cfg.mfPct*100)}% ของงบรวม</div></div>
+      <div class="metric teal"><div class="metric-val">${fmt(rtBudget)}</div><div class="metric-label">Retarget รวม / วัน</div><div class="metric-sub">${Math.round((1-cfg.mfPct)*100)}% — แบ่ง ${contents.length} Contents</div></div>
+      <div class="metric"><div class="metric-val">${fmt(rtPerContent)}</div><div class="metric-label">Retarget ต่อ Content</div><div class="metric-sub">min ฿150/วัน</div></div>
+      <div class="metric"><div class="metric-val">${fmt(cfg.totalBudget * 30)}</div><div class="metric-label">งบรวมต่อเดือน</div><div class="metric-sub">30 วัน</div></div>
+    </div>${warn}`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// BUDGET
+// ═══════════════════════════════════════════════════════════════
+function renderBudget() {
+  const cfg = getConfig();
+  const mfBudget = cfg.totalBudget * cfg.mfPct;
+  const rtBudget = cfg.totalBudget * (1 - cfg.mfPct);
+  const rtPer = contents.length > 0 ? rtBudget / contents.length : 0;
+  const maxCPALow = getMaxCPA(cfg.priceLow, cfg);
+  const maxCPAMid = getMaxCPA(cfg.priceMid, cfg);
+  const maxCPAHigh = getMaxCPA(cfg.priceHigh, cfg);
+
+  g('budgetMetrics').innerHTML = `
+    <div class="metric purple"><div class="metric-val">${fmt(cfg.totalBudget)}</div><div class="metric-label">งบรวม / วัน</div></div>
+    <div class="metric purple"><div class="metric-val">${fmt(mfBudget)}</div><div class="metric-label">Mid Funnel (${Math.round(cfg.mfPct*100)}%)</div></div>
+    <div class="metric teal"><div class="metric-val">${fmt(rtBudget)}</div><div class="metric-label">Retarget (${Math.round((1-cfg.mfPct)*100)}%)</div></div>
+    <div class="metric teal"><div class="metric-val">${fmt(rtPer)}</div><div class="metric-label">ต่อ Content</div></div>`;
+
+  const rows = [
+    ['C1', `MF — All Content`, 'Video Views', `1 Ad Set / ${contents.length} Ads`, fmt(mfBudget), 'ThruPlay ≥20%, CPV ≤฿0.20'],
+    ...contents.map((c, i) => [`C${i+2}`, `RT — ${c.name}`, 'Messages', 'Tier A + Tier B', fmt(rtPer), 'CTR ≥1.5%, Freq ≤3.5'])
+  ];
+  g('budgetTable').innerHTML = `<thead><tr><th>#</th><th>Campaign</th><th>Objective</th><th>Ad Sets</th><th>งบ/วัน</th><th>KPI หลัก</th></tr></thead><tbody>
+    ${rows.map((r,i) => `<tr><td><span class="tag ${i===0?'tag-purple':'tag-teal'}">${r[0]}</span></td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td class="${i===0?'text-purple':'text-teal'} fw-600">${r[4]}</td><td class="text-xs">${r[5]}</td></tr>`).join('')}
+    <tr style="border-top:2px solid var(--border2)"><td colspan="4" class="fw-600">รวม ${contents.length+1} Campaigns</td><td class="fw-600 text-purple">${fmt(cfg.totalBudget)}</td><td></td></tr>
+  </tbody>`;
+
+  const skus = [
+    { name: 'Low', price: cfg.priceLow },
+    { name: 'Mid', price: cfg.priceMid },
+    { name: 'High', price: cfg.priceHigh },
+  ];
+  g('cpaTable').innerHTML = `<thead><tr><th>SKU</th><th>ราคาขาย</th><th>Max CPA (${Math.round(cfg.mktPct*100)}%)</th><th>Target CPA แนะนำ</th><th>Max Cost / Chat</th><th>Pause เมื่อ</th><th>สถานะ</th></tr></thead><tbody>
+    ${skus.map(s => {
+      const mx = getMaxCPA(s.price, cfg);
+      const tgt = getTargetCPA(s.price, cfg);
+      const chat = getCostPerChat(s.price, cfg);
+      const tight = mx < 300;
+      return `<tr><td class="fw-600">${s.name}</td><td>${fmt(s.price)}</td><td class="fw-600">${fmt(mx)}</td><td class="${tight?'text-amber':'text-teal'} fw-600">${fmt(tgt*0.9)} – ${fmt(tgt)}</td><td>${fmt(chat)}</td><td class="text-red">${fmt(mx)}+</td><td><span class="tag ${tight?'tag-amber':'tag-green'}">${tight?'Tight Margin':'Room to Scale'}</span></td></tr>`;
+    }).join('')}
+  </tbody>`;
+
+  let alerts = '';
+  if (rtPer < 150) alerts += `<div class="alert alert-warn"><strong>⚠ งบ Retarget ต่ำกว่า ฿150/วัน</strong>มี ${contents.length} Contents — งบต่อ Campaign = ${fmt(rtPer)} ซึ่งต่ำเกินไป Algorithm อาจเข้า Learning Limited</div>`;
+  if (contents.length >= 5) alerts += `<div class="alert alert-warn"><strong>⚠ ${contents.length} Contents — ใกล้ Budget Ceiling แล้ว</strong>ถ้าเกิน 5 Contents ด้วยงบ ${fmt(cfg.totalBudget)}/วัน ควรเพิ่มงบหรือ Rotate Content แทน</div>`;
+  g('budgetAlerts').innerHTML = alerts;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CAMPAIGNS
+// ═══════════════════════════════════════════════════════════════
+function renderCampaigns() {
+  const cfg = getConfig();
+  const rtPer = contents.length > 0 ? (cfg.totalBudget * (1-cfg.mfPct)) / contents.length : 0;
+
+  const colorMap = { Review: 'purple', Trust: 'teal', Problem: 'teal', default: 'teal' };
+  g('contentGrid').innerHTML = contents.map(c => `
+    <div class="content-card">
+      <div class="content-card-type text-${colorMap[c.name]||'teal'}">${c.type}</div>
+      <div class="content-card-name">${c.name}</div>
+      <div class="content-card-status"><span class="status-dot dot-green"></span>Active — MF_${c.name}_v1</div>
+      <div class="content-card-status mt-8 text-xs">CA: 3 ตัว | RT: 1 Campaign</div>
+      <div class="content-card-actions">
+        <button class="btn btn-ghost btn-sm" onclick="removeContent(${c.id})">ลบ</button>
+      </div>
+    </div>
+  `).join('') + `<div class="content-card new-content" onclick="openModal()">+ เพิ่ม Content ใหม่</div>`;
+
+  g('campaignTable').innerHTML = `<thead><tr><th>#</th><th>Campaign Name</th><th>Objective</th><th>Ad Sets</th><th>Ads</th><th>งบ/วัน</th></tr></thead><tbody>
+    <tr><td><span class="tag tag-purple">C1</span></td><td>MF_AllContent</td><td>Video Views</td><td>1</td><td>${contents.map(c=>`MF_${c.name}_v1`).join(', ')}</td><td class="text-purple fw-600">${fmt(cfg.totalBudget * cfg.mfPct)}</td></tr>
+    ${contents.map((c,i) => `<tr><td><span class="tag tag-teal">C${i+2}</span></td><td>RT_${c.name}</td><td>Messages</td><td>2 (Tier A + B)</td><td>RT_${c.name}_CloseSell_v1</td><td class="text-teal fw-600">${fmt(rtPer)}</td></tr>`).join('')}
+  </tbody>`;
+
+  const limit = contents.length >= 5;
+  g('contentLimitAlert').innerHTML = limit ? `<div class="alert alert-warn"><strong>⚠ ${contents.length} Contents รันพร้อมกัน</strong>งบ ${fmt(cfg.totalBudget)}/วัน รองรับได้สูงสุด 5 Contents — RT ต่อ Campaign = ${fmt(rtPer)} ถ้าต่ำกว่า ฿150 ควรพิจารณา Rotate แทน</div>` : '';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUDIENCES
+// ═══════════════════════════════════════════════════════════════
+function renderAudiences() {
+  const total = contents.length * 3 + 2;
+  g('audienceSummary').innerHTML = `
+    <div class="metric purple"><div class="metric-val">${contents.length}</div><div class="metric-label">Contents</div></div>
+    <div class="metric purple"><div class="metric-val">${contents.length * 3}</div><div class="metric-label">Core CA</div><div class="metric-sub">3 Tier ต่อ Content</div></div>
+    <div class="metric"><div class="metric-val">2</div><div class="metric-label">Exclusion CA</div></div>
+    <div class="metric teal"><div class="metric-val">${total}</div><div class="metric-label">CA รวมทั้งหมด</div><div class="metric-sub">สร้างวันแรก</div></div>`;
+
+  const tiers = [
+    { tier: 'Hot', window: '7d', def: 'ดู Video 75%+ ใน 7 วัน', usage: 'RT TierA', tag: 'tag-red' },
+    { tier: 'Warm', window: '14d', def: 'ดู Video 25%+ ใน 14 วัน', usage: 'RT TierB', tag: 'tag-amber' },
+    { tier: 'Engaged', window: '30d', def: 'Like/Comment/Share ใน 30 วัน', usage: 'RT TierC / LAL Seed', tag: 'tag-teal' },
+  ];
+  let rows = '';
+  contents.forEach(c => {
+    tiers.forEach(t => {
+      rows += `<tr><td><code style="font-size:11px;color:var(--teal)">CA_${c.name}_${t.tier}_${t.window}</code></td><td>${c.name}</td><td><span class="tag ${t.tag}">${t.tier}</span></td><td>${t.def}</td><td>${t.usage}</td></tr>`;
+    });
+  });
+  g('audienceTable').innerHTML = `<thead><tr><th>CA Name</th><th>Source Content</th><th>Tier</th><th>Definition</th><th>ใช้ใน</th></tr></thead><tbody>${rows}</tbody>`;
+
+  const exclRows = `
+    <tr><td><code style="font-size:11px;color:var(--amber)">EXCL_Converted</code></td><td>Pancake Purchase Event</td><td>ลูกค้าที่ซื้อแล้ว</td><td>Exclude ออกจากทุก RT Campaign</td></tr>
+    <tr><td><code style="font-size:11px;color:var(--amber)">EXCL_AllHot</code></td><td>Combine ${contents.map(c=>`CA_${c.name}_Hot`).join(' + ')}</td><td>Hot รวมทุก Content</td><td>Exclude จาก Warm และ Engaged Ad Sets</td></tr>`;
+  g('exclusionTable').innerHTML = `<thead><tr><th>CA Name</th><th>Source</th><th>Definition</th><th>ใช้เป็น</th></tr></thead><tbody>${exclRows}</tbody>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// POOL MONITOR
+// ═══════════════════════════════════════════════════════════════
+function renderPoolMonitor() {
+  const cfg = getConfig();
+  const rtPer = contents.length > 0 ? (cfg.totalBudget * (1-cfg.mfPct)) / contents.length : 0;
+  const minHot = 300, minWarm = 500, minEngaged = 1000;
+
+  let html = '';
+  contents.forEach(c => {
+    const hotOk = c.poolHot >= minHot;
+    const warmOk = c.poolWarm >= minWarm;
+    const engOk = c.poolEngaged >= minEngaged;
+    html += `<div class="card mb-16">
+      <div class="flex-between mb-8"><span class="fw-600">${c.name} Content</span><span class="text-xs">RT Campaign: RT_${c.name}</span></div>
+      <div class="pool-bar"><div class="pool-bar-label"><span>Hot (7d) <span class="text-xs">— min ${fmtN(minHot)}</span></span><span>${fmtN(c.poolHot)} คน</span></div><div class="pool-bar-track"><div class="pool-bar-fill" style="width:${Math.min(c.poolHot/minHot*100,100)}%;background:${hotOk?'var(--green)':'var(--amber)'}"></div></div></div>
+      <div class="pool-bar mt-8"><div class="pool-bar-label"><span>Warm (14d) <span class="text-xs">— min ${fmtN(minWarm)}</span></span><span>${fmtN(c.poolWarm)} คน</span></div><div class="pool-bar-track"><div class="pool-bar-fill" style="width:${Math.min(c.poolWarm/minWarm*100,100)}%;background:${warmOk?'var(--green)':'var(--amber)'}"></div></div></div>
+      <div class="pool-bar mt-8"><div class="pool-bar-label"><span>Engaged (30d) <span class="text-xs">— min ${fmtN(minEngaged)}</span></span><span>${fmtN(c.poolEngaged)} คน</span></div><div class="pool-bar-track"><div class="pool-bar-fill" style="width:${Math.min(c.poolEngaged/minEngaged*100,100)}%;background:${engOk?'var(--green)':'var(--amber)'}"></div></div></div>
+      <div class="field-row3 mt-8">
+        <div class="field"><label>Hot Pool Size</label><input type="number" placeholder="กรอก Pool จริง" value="${c.poolHot||''}" onchange="updatePool(${c.id},'hot',this.value)"></div>
+        <div class="field"><label>Warm Pool Size</label><input type="number" placeholder="กรอก Pool จริง" value="${c.poolWarm||''}" onchange="updatePool(${c.id},'warm',this.value)"></div>
+        <div class="field"><label>Engaged Pool Size</label><input type="number" placeholder="กรอก Pool จริง" value="${c.poolEngaged||''}" onchange="updatePool(${c.id},'engaged',this.value)"></div>
+      </div>
+      <div class="flex" style="gap:8px;flex-wrap:wrap;margin-top:8px">
+        <span class="tag ${hotOk?'tag-green':'tag-amber'}">${hotOk?'✓ Tier A พร้อม Launch':'⚠ Tier A ยังไม่พร้อม'}</span>
+        <span class="tag ${warmOk?'tag-green':'tag-amber'}">${warmOk?'✓ Tier B พร้อม Launch':'⚠ Tier B ยังไม่พร้อม'}</span>
+        <span class="tag ${engOk?'tag-green':'tag-amber'}">${engOk?'✓ LAL Seed พร้อม':'⚠ LAL ยังไม่พร้อม'}</span>
+      </div>
+    </div>`;
+  });
+  g('poolMonitor').innerHTML = html;
+
+  const tiers = [
+    { name: 'Hot → Tier A', budget: rtPer * 0.6, min: 300, ideal: 1000 },
+    { name: 'Warm → Tier B', budget: rtPer * 0.4, min: 500, ideal: 2000 },
+    { name: 'Engaged → Tier C / LAL', budget: rtPer * 0.2, min: 1000, ideal: 3000 },
+  ];
+  g('poolCalc').innerHTML = `<div class="table-wrap"><table><thead><tr><th>Tier</th><th>งบ/วัน (สมมติ)</th><th>Pool ขั้นต่ำ</th><th>Pool Ideal</th><th>คำนวณจาก</th></tr></thead><tbody>
+    ${tiers.map(t => `<tr><td>${t.name}</td><td>${fmt(t.budget)}</td><td class="text-amber fw-600">${fmtN(t.min)} คน</td><td class="text-green fw-600">${fmtN(t.ideal)} คน</td><td class="text-xs">(${fmt(t.budget)} ÷ CPM${fmt(cfg.targetCPM)}) × 1000 × FreqCap${cfg.freqCap}</td></tr>`).join('')}
+  </tbody></table></div>`;
+}
+
+function updatePool(id, tier, val) {
+  const c = contents.find(x => x.id === id);
+  if (!c) return;
+  if (tier === 'hot') c.poolHot = parseInt(val) || 0;
+  if (tier === 'warm') c.poolWarm = parseInt(val) || 0;
+  if (tier === 'engaged') c.poolEngaged = parseInt(val) || 0;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAMING
+// ═══════════════════════════════════════════════════════════════
+function renderNaming() {
+  const cfg = getConfig();
+  const brand = cfg.brand.replace(/\s+/g,'_');
+  g('namingExamples').innerHTML = `
+    <div class="card">
+      <div class="card-title">มาตรฐาน Naming Convention</div>
+      <div class="table-wrap"><table><thead><tr><th>ระดับ</th><th>Format</th><th>ตัวอย่าง</th></tr></thead><tbody>
+        <tr><td>Campaign MF</td><td><code>MF_[Content]</code></td><td class="text-teal"><code>MF_AllContent</code></td></tr>
+        <tr><td>Campaign RT</td><td><code>RT_[Content]</code></td><td class="text-teal"><code>RT_Review</code></td></tr>
+        <tr><td>Ad Set</td><td><code>RT_[Content]_Tier[A/B/C]</code></td><td class="text-teal"><code>RT_Review_TierA</code></td></tr>
+        <tr><td>Ad (MF)</td><td><code>MF_[Content]_v[N]</code></td><td class="text-teal"><code>MF_Review_v1</code></td></tr>
+        <tr><td>Ad (RT)</td><td><code>RT_[Content]_[Creative]_v[N]</code></td><td class="text-teal"><code>RT_Review_CloseSell_v1</code></td></tr>
+        <tr><td>Custom Audience</td><td><code>CA_[Content]_[Tier]_[Window]d</code></td><td class="text-teal"><code>CA_Review_Hot_7d</code></td></tr>
+        <tr><td>Exclusion</td><td><code>EXCL_[Description]</code></td><td class="text-amber"><code>EXCL_Converted</code></td></tr>
+      </tbody></table></div>
+      <div class="alert alert-warn mt-8"><strong>กฎที่ต้องปฏิบัติเสมอ</strong>ห้ามมีช่องว่าง, ใช้ _ คั่นเสมอ, ห้ามใช้ตัวพิมพ์ใหญ่สลับเล็กแบบสุ่ม — ถ้า Naming ไม่ Consistent ข้อมูลใน Ads Manager จะแตกและ Attribution ผิดพลาด</div>
+    </div>`;
+  updateNaming();
+}
+
+function updateNaming() {
+  const content = s('namingContent');
+  const ver = s('namingVersion') || 'v1';
+  const out = [
+    { label: 'MF Ad Name', val: `MF_${content}_${ver}` },
+    { label: 'RT Campaign', val: `RT_${content}` },
+    { label: 'RT Ad Set Tier A', val: `RT_${content}_TierA` },
+    { label: 'RT Ad Set Tier B', val: `RT_${content}_TierB` },
+    { label: 'RT Ad', val: `RT_${content}_CloseSell_${ver}` },
+    { label: 'CA Hot', val: `CA_${content}_Hot_7d` },
+    { label: 'CA Warm', val: `CA_${content}_Warm_14d` },
+    { label: 'CA Engaged', val: `CA_${content}_Engaged_30d` },
+  ];
+  if (!g('namingOutput')) return;
+  g('namingOutput').innerHTML = `<div class="field-row" style="grid-template-columns:1fr 1fr">
+    ${out.map(o=>`<div class="naming-row"><div class="naming-row-label">${o.label}</div><div class="naming-example">${o.val}</div></div>`).join('')}
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CHECKLIST
+// ═══════════════════════════════════════════════════════════════
+const checklistData = {
+  day1: [
+    { id: 'ca_all', text: `สร้าง CA ทั้งหมด`, sub: 'Core CA (3 Tier × จำนวน Content) + EXCL_Converted + EXCL_AllHot' },
+    { id: 'pixel_test', text: 'ทดสอบ Pixel ยิง Purchase Event ผ่าน Pancake', sub: 'ไปที่ Facebook Events Manager → Verify' },
+    { id: 'attribution', text: 'ตั้ง Attribution Window: 7-day Click / 1-day View', sub: 'Ads Manager → Campaign Settings' },
+    { id: 'naming_check', text: 'ตั้งชื่อ Campaign, Ad Set, Ad ตาม Naming Convention', sub: 'ห้ามมีช่องว่าง — ใช้ _ คั่นเสมอ' },
+    { id: 'freq_cap', text: 'ตั้ง Frequency Cap: 3 ครั้ง / 7 วัน', sub: 'ตั้งที่ Ad Set Level ของทุก RT Campaign' },
+  ],
+  launch: [
+    { id: 'launch_mf', text: 'Launch MF Campaign (C1) เท่านั้น — ยังไม่เปิด Retarget', sub: `งบ ${fmt(v('totalBudget') * v('mfPct') / 100)}/วัน` },
+    { id: 'verify_ads', text: 'ตรวจสอบ Ad ทั้ง 3 ตัวใน C1 Approved และรันอยู่', sub: 'MF_Review_v1, MF_Trust_v1, MF_Problem_v1' },
+    { id: 'check_pool_day3', text: 'เช็ค Pool Size ทุกวัน — วันที่ 3 หลัง Launch', sub: 'ถ้า Pool โตน้อยกว่า 50 คน/วัน → Review Creative' },
+  ],
+  retarget: [
+    { id: 'pool_ready', text: 'เช็ค Pool Size: CA_[Content]_Hot ≥ 300 คนก่อนเปิด', sub: 'ดูใน Facebook Audiences → Audience Size' },
+    { id: 'excl_added', text: 'เพิ่ม EXCL_Converted และ EXCL_AllHot ใน Exclusions ทุก RT Ad Set', sub: 'สำคัญมาก — ถ้าลืม Frequency จะพุ่ง' },
+    { id: 'rt_launch', text: 'Launch RT Campaign เฉพาะ Content ที่ Pool ≥ 300 คน', sub: 'อย่ารีบเปิดทั้งหมดพร้อมกันถ้า Pool ยังไม่พร้อม' },
+    { id: 'monitor_freq', text: 'Monitor Frequency ทุกวัน 3 วันแรกหลัง Launch RT', sub: 'ถ้า Frequency เกิน 2.0 ใน 3 วัน → Pool เล็กเกินไป' },
+  ],
+  weekly: [
+    { id: 'reconcile', text: 'Reconcile Order (Pancake) vs Conversion (Ads Manager)', sub: 'Gap ≤15% — ถ้าเกินตรวจ Status Workflow ของ Sales' },
+    { id: 'freq_check', text: 'เช็ค Frequency ทุก Campaign', sub: 'เกิน 3.5 → Refresh Creative ก่อน Scale งบ' },
+    { id: 'cpa_check', text: 'เช็ค CPA เทียบ Target แต่ละ SKU', sub: 'CPA เกิน Target 30%+ ติดต่อ 5 วัน → Pause' },
+    { id: 'thruplay_check', text: 'เช็ค ThruPlay Rate ของ MF Ads ทุกตัว', sub: 'ต่ำกว่า 15% ติดต่อ 7 วัน → เปลี่ยน Creative' },
+    { id: 'pool_growth', text: 'เช็ค Pool Growth Rate', sub: 'ถ้า Pool หยุดโต → Review Content ไม่ใช่เพิ่มงบ' },
+  ],
+  newcontent: [
+    { id: 'nc_upload', text: 'Upload Ad ใหม่ใน C1 (MF Campaign เดิม)', sub: 'ตั้งชื่อ MF_[ContentType]_v1 — ไม่สร้าง Campaign ใหม่' },
+    { id: 'nc_ca', text: 'สร้าง CA ใหม่ 3 ตัว', sub: 'CA_[New]_Hot_7d, CA_[New]_Warm_14d, CA_[New]_Engaged_30d' },
+    { id: 'nc_excl', text: 'Update EXCL_AllHot — เพิ่ม CA_[New]_Hot เข้าไป', sub: 'Audiences → EXCL_AllHot → Edit → เพิ่ม Source' },
+    { id: 'nc_rt', text: 'สร้าง RT Campaign ใหม่ 1 Campaign / 2 Ad Sets', sub: 'ชื่อ RT_[New] — Tier A + Tier B' },
+    { id: 'nc_budget', text: 'ปรับงบ MF และ RT ใหม่ตามจำนวน Content ที่เพิ่ม', sub: 'RT ต้องได้ไม่ต่ำกว่า ฿150/Campaign/วัน' },
+  ],
+};
+
+function renderChecklist() {
+  Object.entries(checklistData).forEach(([section, items]) => {
+    const el = g('checklist-' + section);
+    if (!el) return;
+    el.innerHTML = items.map(item => {
+      const checked = checkStates[item.id] || false;
+      return `<li><input type="checkbox" id="ck_${item.id}" ${checked?'checked':''} onchange="toggleCheck('${item.id}', this.checked)">
+        <div class="check-label ${checked?'done':''}">
+          ${item.text}
+          <span class="check-meta">${item.sub}</span>
+        </div></li>`;
+    }).join('');
+  });
+  updateCheckProgress();
+}
+
+function toggleCheck(id, val) {
+  checkStates[id] = val;
+  updateCheckProgress();
+  const el = document.querySelector(`#ck_${id}`).parentElement.querySelector('.check-label');
+  if (el) el.classList.toggle('done', val);
+}
+
+function updateCheckProgress() {
+  const all = Object.values(checklistData).flat();
+  const done = all.filter(i => checkStates[i.id]).length;
+  const total = all.length;
+  const pct = Math.round(done / total * 100);
+  if (g('checkProgress')) g('checkProgress').innerHTML = `<span class="text-${pct===100?'green':'amber'}">${done}/${total} รายการ (${pct}%)</span> เสร็จแล้ว`;
+}
+
+function resetChecklist() {
+  checkStates = {};
+  renderChecklist();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCALE CHECKER
+// ═══════════════════════════════════════════════════════════════
+function checkScale() {
+  const cfg = getConfig();
+  const cpa = v('checkCPA');
+  const ctr = v('checkCTR');
+  const freq = v('checkFreq');
+  const thru = v('checkThruPlay');
+  const sku = s('checkSKU');
+  const price = sku === 'low' ? cfg.priceLow : sku === 'high' ? cfg.priceHigh : cfg.priceMid;
+  const maxCPA = getMaxCPA(price, cfg);
+  const targetCPA = getTargetCPA(price, cfg);
+
+  if (!cpa && !ctr && !freq && !thru) { g('scaleResult').innerHTML = ''; return; }
+
+  let actions = [];
+  let verdict = 'watch';
+
+  if (cpa > 0) {
+    const ratio = cpa / maxCPA;
+    if (cpa <= targetCPA && freq < 2.5 && ctr >= 1.5) { actions.push({ type: 'ok', msg: `CPA ${fmt(cpa)} อยู่ใน Target (Max ${fmt(maxCPA)}) — พร้อม Scale +20-30% งบ` }); verdict = 'scale'; }
+    else if (ratio > 1.3) { actions.push({ type: 'bad', msg: `CPA ${fmt(cpa)} เกิน Max CPA ${fmt(maxCPA)} ถึง ${Math.round((ratio-1)*100)}% — Pause ทันที` }); verdict = 'pause'; }
+    else if (ratio > 1.0) { actions.push({ type: 'warn', msg: `CPA ${fmt(cpa)} เกิน Max CPA ${fmt(maxCPA)} — อย่าเพิ่มงบ ให้ Review Creative ก่อน` }); verdict = 'warn'; }
+  }
+  if (freq > 3.5) { actions.push({ type: 'bad', msg: `Frequency ${freq} เกิน 3.5 — Refresh Creative ก่อนทุกอย่าง` }); verdict = 'pause'; }
+  else if (freq > 2.5 && freq <= 3.5) { actions.push({ type: 'warn', msg: `Frequency ${freq} สูงขึ้น — เตรียม Creative ใหม่ไว้` }); }
+  if (ctr > 0 && ctr < 1.0) { actions.push({ type: 'warn', msg: `CTR ${ctr}% ต่ำกว่า 1.0% — ตรวจ Creative หรือ Audience Mismatch` }); }
+  if (thru > 0 && thru < 15) { actions.push({ type: 'bad', msg: `ThruPlay ${thru}% ต่ำกว่า 15% — เปลี่ยน Hook หรือ Creative` }); verdict = 'warn'; }
+
+  const verdictHTML = {
+    scale: `<div class="alert alert-ok"><strong>⚡ แนะนำ: SCALE</strong>ตัวเลขอยู่ใน Zone ดี — เพิ่มงบได้ 20-30% ทุก 48-72h</div>`,
+    pause: `<div class="alert alert-red"><strong>⛔ แนะนำ: PAUSE</strong>มีตัวเลขที่ต้องแก้ก่อน — อย่าเพิ่มงบในสถานการณ์นี้</div>`,
+    warn: `<div class="alert alert-warn"><strong>⚠ แนะนำ: WATCH & OPTIMIZE</strong>บางตัวเลขน่ากังวล — รอ 3-5 วันแล้วประเมินใหม่</div>`,
+    watch: `<div class="alert alert-info"><strong>👁 สถานะ: MONITOR</strong>ข้อมูลยังไม่พอสรุป — รวบรวมข้อมูลต่อไป</div>`,
+  };
+
+  g('scaleResult').innerHTML = verdictHTML[verdict] + actions.map(a =>
+    `<div class="alert ${a.type==='ok'?'alert-ok':a.type==='bad'?'alert-red':'alert-warn'}">${a.msg}</div>`
+  ).join('');
+}
+
+function renderScale() {
+  const cfg = getConfig();
+  g('scaleRules').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+      <div><div class="check-group-title" style="color:var(--green)">✅ Scale เมื่อ</div>
+        ${['CPA ≤ Target ≥7 วันติดต่อกัน','Frequency < 2.5 และ CTR ไม่ตก','Pool ยังโตอยู่','เพิ่มงบ max 20-30% ทุก 48-72h'].map(t=>`<div class="tl-body" style="margin:6px 0;font-size:12px">• ${t}</div>`).join('')}</div>
+      <div><div class="check-group-title" style="color:var(--red)">⛔ Pause เมื่อ</div>
+        ${['CPA เกิน Target 30%+ ติดต่อ 5-7 วัน','CTR ตกเกิน 30% จาก Peak','Frequency เกิน 3.5','Ad Set เข้า Learning Limited'].map(t=>`<div class="tl-body" style="margin:6px 0;font-size:12px">• ${t}</div>`).join('')}</div>
+      <div><div class="check-group-title" style="color:var(--amber)">🔄 Refresh Creative เมื่อ</div>
+        ${['ThruPlay < 15% ติดต่อ 7 วัน','Frequency > 3.0 ใน 7 วัน','CTR ตก 30%+ จาก Peak','CPA สูงขึ้นโดย Spend เท่าเดิม'].map(t=>`<div class="tl-body" style="margin:6px 0;font-size:12px">• ${t}</div>`).join('')}</div>
+    </div>`;
+
+  const phases = [
+    { date: 'วันที่ 1', color: 'purple', title: 'Setup Day', body: 'สร้าง CA 11 ตัว, ตรวจ Pixel, ตั้ง Attribution', kpis: ['CA ครบ 11 ตัว', 'Pixel ยิงถูก'] },
+    { date: 'สัปดาห์ 1-2', color: 'purple', title: 'Build Pool', body: 'Launch MF Campaign เท่านั้น ยังไม่เปิด Retarget', kpis: [`CPV ≤฿0.20`, 'ThruPlay ≥20%', 'Pool ≥1,000 คน'] },
+    { date: 'สัปดาห์ 3', color: 'teal', title: 'Open Tier A', body: 'เปิด RT เฉพาะ CA_Hot ≥300 คน ตั้ง Freq Cap 3/7d', kpis: ['CTR ≥2%', 'CPC ≤฿6', 'Freq ≤3.0'] },
+    { date: 'สัปดาห์ 4', color: 'teal', title: 'Open Tier B', body: 'เปิด Tier B ถ้า CA_Warm ≥500 คน วัด CPA ครั้งแรก', kpis: ['CPA vs Target', 'Chat-to-Sale Rate'] },
+    { date: 'เดือน 2', color: 'amber', title: 'Optimize & Scale', body: 'Scale RT ที่ดี +20%/48h ทดสอบ LAL จาก CA_Hot', kpis: ['ROAS', 'CPA Trend', 'Pool Growth'] },
+    { date: 'เดือน 3', color: 'amber', title: 'Scale Structure', body: `แยก MF เป็น ${contents.length} Campaigns ถ้า Pool ≥5,000`, kpis: ['Monthly Revenue', 'CAC vs LTV'] },
+  ];
+  g('timeline').innerHTML = phases.map(p => `
+    <div class="tl-item">
+      <div class="tl-dot ${p.color}"></div>
+      <div class="tl-date">${p.date}</div>
+      <div class="tl-title">${p.title}</div>
+      <div class="tl-body">${p.body}</div>
+      <div class="tl-kpi">${p.kpis.map(k=>`<span class="kpi-pill">${k}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONTENT MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+function openModal() { g('addContentModal').classList.add('open'); }
+function closeModal() { g('addContentModal').classList.remove('open'); g('newContentName').value = ''; g('newContentPreview').innerHTML = ''; }
+
+function previewNewContent() {
+  const name = g('newContentName').value.replace(/\s+/g,'_');
+  if (!name) { g('newContentPreview').innerHTML = ''; return; }
+  g('newContentPreview').innerHTML = `<div class="naming-row"><div class="naming-row-label">ตัวอย่างชื่อที่จะสร้าง</div>
+    <div class="naming-example">MF_${name}_v1 / RT_${name} / CA_${name}_Hot_7d</div></div>`;
+}
+
+function addContent() {
+  const type = s('newContentType');
+  const rawName = g('newContentName').value.trim().replace(/\s+/g,'_');
+  if (!rawName) { alert('กรุณากรอกชื่อ Content'); return; }
+  contents.push({ id: nextId++, type, name: rawName, active: true, poolHot: 0, poolWarm: 0, poolEngaged: 0 });
+  closeModal();
+  updateAll();
+}
+
+function removeContent(id) {
+  if (contents.length <= 1) { alert('ต้องมีอย่างน้อย 1 Content'); return; }
+  if (!confirm('ต้องการลบ Content นี้?')) return;
+  contents = contents.filter(c => c.id !== id);
+  updateAll();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+updateAll();
+</script>
+</body>
+</html>
