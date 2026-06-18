@@ -726,20 +726,20 @@ function renderPoolMonitor() {
     const hotOk = c.poolHot >= minHot;
     const warmOk = c.poolWarm >= minWarm;
     const engOk = c.poolEngaged >= minEngaged;
-    html += `<div class="card mb-16">
+    html += `<div class="card mb-16" data-pool-id="${c.id}">
       <div class="flex-between mb-8"><span class="fw-600">${c.name} Content</span><span class="text-xs">RT Campaign: RT_${c.name}</span></div>
-      <div class="pool-bar"><div class="pool-bar-label"><span>Hot (7d) <span class="text-xs">— min ${fmtN(minHot)}</span></span><span>${fmtN(c.poolHot)} คน</span></div><div class="pool-bar-track"><div class="pool-bar-fill" style="width:${Math.min(c.poolHot/minHot*100,100)}%;background:${hotOk?'var(--green)':'var(--amber)'}"></div></div></div>
-      <div class="pool-bar mt-8"><div class="pool-bar-label"><span>Warm (14d) <span class="text-xs">— min ${fmtN(minWarm)}</span></span><span>${fmtN(c.poolWarm)} คน</span></div><div class="pool-bar-track"><div class="pool-bar-fill" style="width:${Math.min(c.poolWarm/minWarm*100,100)}%;background:${warmOk?'var(--green)':'var(--amber)'}"></div></div></div>
-      <div class="pool-bar mt-8"><div class="pool-bar-label"><span>Engaged (30d) <span class="text-xs">— min ${fmtN(minEngaged)}</span></span><span>${fmtN(c.poolEngaged)} คน</span></div><div class="pool-bar-track"><div class="pool-bar-fill" style="width:${Math.min(c.poolEngaged/minEngaged*100,100)}%;background:${engOk?'var(--green)':'var(--amber)'}"></div></div></div>
+      <div class="pool-bar"><div class="pool-bar-label"><span>Hot (7d) <span class="text-xs">— min ${fmtN(minHot)}</span></span><span class="pool-count">${fmtN(c.poolHot)} คน</span></div><div class="pool-bar-track"><div class="pool-bar-fill" style="width:${Math.min(c.poolHot/minHot*100,100)}%;background:${hotOk?'var(--green)':'var(--amber)'}"></div></div></div>
+      <div class="pool-bar mt-8"><div class="pool-bar-label"><span>Warm (14d) <span class="text-xs">— min ${fmtN(minWarm)}</span></span><span class="pool-count">${fmtN(c.poolWarm)} คน</span></div><div class="pool-bar-track"><div class="pool-bar-fill" style="width:${Math.min(c.poolWarm/minWarm*100,100)}%;background:${warmOk?'var(--green)':'var(--amber)'}"></div></div></div>
+      <div class="pool-bar mt-8"><div class="pool-bar-label"><span>Engaged (30d) <span class="text-xs">— min ${fmtN(minEngaged)}</span></span><span class="pool-count">${fmtN(c.poolEngaged)} คน</span></div><div class="pool-bar-track"><div class="pool-bar-fill" style="width:${Math.min(c.poolEngaged/minEngaged*100,100)}%;background:${engOk?'var(--green)':'var(--amber)'}"></div></div></div>
       <div class="field-row3 mt-8">
-        <div class="field"><label>Hot Pool Size</label><input type="number" placeholder="กรอก Pool จริง" value="${c.poolHot||''}" onchange="updatePool(${c.id},'hot',this.value)"></div>
-        <div class="field"><label>Warm Pool Size</label><input type="number" placeholder="กรอก Pool จริง" value="${c.poolWarm||''}" onchange="updatePool(${c.id},'warm',this.value)"></div>
-        <div class="field"><label>Engaged Pool Size</label><input type="number" placeholder="กรอก Pool จริง" value="${c.poolEngaged||''}" onchange="updatePool(${c.id},'engaged',this.value)"></div>
+        <div class="field"><label>Hot Pool Size</label><input type="number" placeholder="กรอก Pool จริง" value="${c.poolHot||''}" oninput="updatePool(${c.id},'hot',this.value)"></div>
+        <div class="field"><label>Warm Pool Size</label><input type="number" placeholder="กรอก Pool จริง" value="${c.poolWarm||''}" oninput="updatePool(${c.id},'warm',this.value)"></div>
+        <div class="field"><label>Engaged Pool Size</label><input type="number" placeholder="กรอก Pool จริง" value="${c.poolEngaged||''}" oninput="updatePool(${c.id},'engaged',this.value)"></div>
       </div>
       <div class="flex" style="gap:8px;flex-wrap:wrap;margin-top:8px">
-        <span class="tag ${hotOk?'tag-green':'tag-amber'}">${hotOk?'✓ Tier A พร้อม Launch':'⚠ Tier A ยังไม่พร้อม'}</span>
-        <span class="tag ${warmOk?'tag-green':'tag-amber'}">${warmOk?'✓ Tier B พร้อม Launch':'⚠ Tier B ยังไม่พร้อม'}</span>
-        <span class="tag ${engOk?'tag-green':'tag-amber'}">${engOk?'✓ LAL Seed พร้อม':'⚠ LAL ยังไม่พร้อม'}</span>
+        <span class="tag pool-status-tag ${hotOk?'tag-green':'tag-amber'}">${hotOk?'✓ Tier A พร้อม Launch':'⚠ Tier A ยังไม่พร้อม'}</span>
+        <span class="tag pool-status-tag ${warmOk?'tag-green':'tag-amber'}">${warmOk?'✓ Tier B พร้อม Launch':'⚠ Tier B ยังไม่พร้อม'}</span>
+        <span class="tag pool-status-tag ${engOk?'tag-green':'tag-amber'}">${engOk?'✓ LAL Seed พร้อม':'⚠ LAL ยังไม่พร้อม'}</span>
       </div>
     </div>`;
   });
@@ -761,6 +761,33 @@ function updatePool(id, tier, val) {
   if (tier === 'hot') c.poolHot = parseInt(val) || 0;
   if (tier === 'warm') c.poolWarm = parseInt(val) || 0;
   if (tier === 'engaged') c.poolEngaged = parseInt(val) || 0;
+
+  const cfg = getConfig();
+  const minHot = 300, minWarm = 500, minEngaged = 1000;
+  const wrap = document.querySelector(`[data-pool-id="${id}"]`);
+  if (!wrap) return;
+
+  // Update bars
+  const hotOk = c.poolHot >= minHot;
+  const warmOk = c.poolWarm >= minWarm;
+  const engOk  = c.poolEngaged >= minEngaged;
+
+  const bars = wrap.querySelectorAll('.pool-bar-fill');
+  if (bars[0]) { bars[0].style.width = Math.min(c.poolHot / minHot * 100, 100) + '%'; bars[0].style.background = hotOk ? 'var(--green)' : 'var(--amber)'; }
+  if (bars[1]) { bars[1].style.width = Math.min(c.poolWarm / minWarm * 100, 100) + '%'; bars[1].style.background = warmOk ? 'var(--green)' : 'var(--amber)'; }
+  if (bars[2]) { bars[2].style.width = Math.min(c.poolEngaged / minEngaged * 100, 100) + '%'; bars[2].style.background = engOk ? 'var(--green)' : 'var(--amber)'; }
+
+  // Update bar count labels
+  const counts = wrap.querySelectorAll('.pool-count');
+  if (counts[0]) counts[0].textContent = fmtN(c.poolHot) + ' คน';
+  if (counts[1]) counts[1].textContent = fmtN(c.poolWarm) + ' คน';
+  if (counts[2]) counts[2].textContent = fmtN(c.poolEngaged) + ' คน';
+
+  // Update status tags
+  const tags = wrap.querySelectorAll('.pool-status-tag');
+  if (tags[0]) { tags[0].className = `tag pool-status-tag ${hotOk ? 'tag-green' : 'tag-amber'}`; tags[0].textContent = hotOk ? '✓ Tier A พร้อม Launch' : '⚠ Tier A ยังไม่พร้อม'; }
+  if (tags[1]) { tags[1].className = `tag pool-status-tag ${warmOk ? 'tag-green' : 'tag-amber'}`; tags[1].textContent = warmOk ? '✓ Tier B พร้อม Launch' : '⚠ Tier B ยังไม่พร้อม'; }
+  if (tags[2]) { tags[2].className = `tag pool-status-tag ${engOk ? 'tag-green' : 'tag-amber'}`; tags[2].textContent = engOk ? '✓ LAL Seed พร้อม' : '⚠ LAL ยังไม่พร้อม'; }
 }
 
 // ═══════════════════════════════════════════════════════════════
